@@ -1,0 +1,21 @@
+March 21st, 2025
+5:30pm-5:45pm (TA Meeting)
+5:45pm-6:00pm (Group Meeting)
+Notes:
+    This week we went over a lot of the user stories and focused on the navigation part of the user stories. 
+
+    We worked a lot on wireframes and user stories last week. We set up a discord to do meetings there and worked a lot on the project document. 
+
+    Always upload team meeting notes into TeamMeetingLogs.txt
+    Make sure to read the rubric before team meetings and complete the requirements.
+
+    We decided to apply the google doc comments to our project and our document.
+    There were no alternative options needed this week.
+    We’ve discussed in our discord our preferences for what we want to work on. We have agreed on our preferences. Jeremy likes to work on backend and Estella likes to work on frontend. Carolyn, Sophie, and Celaena like to work on both frontend and backend.
+
+    We discussed that we will each create our own branches to keep the main code secure and clean. We will discuss what user stories we want to work on next week. We have also established that multiple people can work on the same task.
+
+        We also came to an agreement that we will each take turns taking notes. 
+        Scribe order: Carolyn, Celaena, Jeremy, Estella, Sofie.
+
+    The TA meeting was 15 minutes long. Our personal team meeting lasted 15 minutes. 
