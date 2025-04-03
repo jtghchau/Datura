@@ -23,4 +23,4 @@ services:
       - ./:/repository
     command: 'npm start' #TODO: change the command to `npm run testandrun` to run mocha
 volumes:
-  datura:
+  group-project:
