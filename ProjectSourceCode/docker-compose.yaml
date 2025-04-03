@@ -10,7 +10,7 @@ services:
 
   web:
     image: node:lts
-    user: 'node' # Remove this if you face permission issues when installing packages
+    user: 'node'
     working_dir: /home/node/app
     env_file: .env
     environment:
