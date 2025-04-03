@@ -26,3 +26,10 @@ app.listen(PORT, '0.0.0.0', () => {
 app.get('/', (req, res) => {
     res.render('pages/home');
 });
+
+app.get('/welcome', (req, res) => {
+    res.json({status: 'success', message: 'Welcome!'});
+  });
+
+module.exports = app.listen(3000);
+console.log('Server is listening on port 3000');
