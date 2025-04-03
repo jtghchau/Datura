@@ -11,12 +11,6 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Start the server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
-});
-
-
 // *****************************************************
 //                    API Routes
 // *****************************************************
