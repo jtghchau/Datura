@@ -19,3 +19,16 @@ Notes:
         Scribe order: Carolyn, Celaena, Jeremy, Estella, Sofie.
 
     The TA meeting was 15 minutes long. Our personal team meeting lasted 15 minutes. 
+
+Friday April 4th, 2025
+Restructure branches to be per feature rather than per person.
+Add any user stories we need, even the smaller ones.
+Work on a feature for next week.
+
+This week we talked about how much we are needing to implement and how far other teams are. We also talked about the plan going forward and talked about assigning stories. We discussed how we got the main repo to work on all our local systems. 
+
+We also talked about next week's lab and the one story that needs to be done by then and the next meeting.
+
+We assigned each story in our personal team meeting as well. 
+
+The TA meeting was 15 minutes long. Our personal team meeting lasted 15 minutes.
