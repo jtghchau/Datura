@@ -29,4 +29,23 @@ describe('Server!', () => {
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
-// ********************************************************************************
+//Negative /register unit test
+describe('POST /register (Negative Case)', () => {
+    it('should return 400 when required fields are missing', done => {
+      chai
+        .request(server)
+        .post('/register')
+        .send({ username: 'incompleteUser' }) 
+        .end((err, res) => {
+          expect(res).to.have.status(400); 
+          expect(res.body).to.have.property('error');
+          done();
+        });
+    });
+  });
+
+// *******************************************************************************
+
+// ************ TODO: WRITE Additional 2 UNIT TESTCASES (Part C) *****************
+
+// *******************************************************************************
