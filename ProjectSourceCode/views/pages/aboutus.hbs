@@ -9,7 +9,7 @@
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             /*font*/
-            background-color: #f9f9f9;
+            background-color: #ebe9ecf5;
             margin: 0;
             padding: 0;
         }
@@ -39,6 +39,21 @@
             text-align: justify;
             line-height: 1.6;
         }
+
+        .left_flower {
+            position: fixed;
+            left: 300px;
+            top: 40%;
+            transform: translateY(-50%);
+        }
+
+        .right_flower {
+            position: fixed;
+            right: 300px;
+            top: 40%;
+            transform: translateY(-50%);
+            /*doesnt affect other page elements/moves from original position vertically/horizontally */
+        }
     </style>
 
 </head>
@@ -47,6 +62,15 @@
     <header>
         <h1>About Us</h1>
     </header>
+
+
+    <div class="left_flower">
+        <img src="/images/left_flower.png" alt="left img" style="max-width: 110px; height: auto;" />
+    </div>
+
+    <div class="right_flower">
+        <img src="/images/right_flower.png" alt="right img" style="max-width: 110px; height: auto;" />
+    </div>
 
     <main>
 
@@ -65,13 +89,14 @@
 
             <section style="text-align: center; margin-top: 2em;">
                 <h3> Our Vision Statement</h3>
-                <p style="
-  max-width: 600px;       /* puts constraint on paragraph width */
-  margin: 20px auto;      /* centers horizontally and gives space to top/bottom */
-  padding: 0 1rem;        /* adds padding to left/right*/
-  text-align: justify;    /* makes text aligned and neat */
-  line-height: 1.6;       /* more line space */
-">
+                <p style="max-width: 600px; margin: 20px auto; padding: 0 1rem; text-align: justify; line-height: 1.6;">
+                    <!-- 
+                        Notes:
+                        puts constraint on paragraph width
+                        centers horizontally and gives space to top/bottom
+                        adds padding to left/right
+                        more line space
+                        -->
                     For students looking to be more disciplined in their studies, Datura is a
                     life-changing app that encourages productivity and inspires motivation to
                     complete important tasks. It makes staying on track fun and drastically
