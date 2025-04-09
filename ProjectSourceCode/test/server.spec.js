@@ -79,3 +79,21 @@ describe('POST /login (positive Case)', () => {
       });
   });
 });
+
+
+//Negative /login unit test
+describe('POST /login (Negative Case)', () => {
+
+  it('should return 400 when required fields are missing', (done) => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ password: 'testpassword' })  // Missing username
+      .end((err, res) => {
+        expect(res).to.have.status(400);  // Expect 400 status
+        expect(res.body.error).to.equal('Username and password are required.');
+        done();
+      });
+  });
+
+});
