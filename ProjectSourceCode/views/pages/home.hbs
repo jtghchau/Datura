@@ -16,18 +16,30 @@
         .coin-box {
             display: flex;
             background-color: white;
-            padding: 10px 15px;
+            padding: 5px 10px;
             border-radius: 25px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .coin-box img {
             width: 24px; /* Adjust size of the coin image */
             height: 24px; /* Adjust size of the coin image */
-            margin-right: 10px; /* Space between image and text */
+            margin-right: 4px; /* Space between image and text */
         }
-        .icon-box {
-            font-size: 24px;
-            margin-left: 15px;
+
+        .home-icons {
+            display: flex;
+            align-items: center;  /* Vertically center icons */
+            height: 100%; /* Ensure it fills the height of the parent */
+        }
+
+        .home-icons .icon-link {
+            color: white;
+            margin-right: 1rem;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        .home-icons .icon-link:last-child {
+            margin-right: 0;
         }
 
         .dropdown {
@@ -42,16 +54,26 @@
             width: 200px; /* fixed width */
             text-align: left;
             border: none;
-            padding: 10px 15px;
+            padding: 5px 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between; /* Ensures the arrow is at the far right */
+            align-items: center; /* Vertically center the text and arrow */
         }
+
+        .subject-btn .dropdown-toggle::after {
+            content: '\f107'; /* Unicode for the downward arrow */
+            font-family: 'Bootstrap Icons'; /* Ensure the correct font family is used for the icon */
+            margin-left: 10px; /* Space between text and the arrow */
+        }
+
 
         .placeholder-text {
             color: #999; /* lighter gray for "Select Subject" */
         }
 
         .custom-dropdown {
-            border-radius: 25px;
+            border-radius: 15px;
             width: 200px; /* match button width */
             border: none;
             overflow: hidden;
@@ -59,6 +81,7 @@
 
         .dropdown-item {
             color: #000;
+            font-size: 0.9rem;
         }
     </style>
 
@@ -69,19 +92,19 @@
         <!-- Coins Box -->
         <div class="coin-box">
             <img src="/images/coin.png" alt="Coin"> 
-            <span>10000000</span>
+            <span>100000</span>
         </div>
 
         <!-- Icons -->
-        <div class="d-flex">
-            <a class="nav-link" href="/notes">
-                <i class="fas fa-sticky-note icon-box text-white"></i>
+        <div class="home-icons">
+            <a class="icon-link" href="/notes">
+                <i class="bi bi-journal-bookmark fs-4"></i>
             </a>
-            <a class="nav-link" href="/notes">
-                <i class="fas fa-shopping-bag icon-box text-white"></i>
+            <a class="icon-link" href="/notes">
+                <i class="bi bi-bag fs-4"></i>
             </a>
-            <a class="nav-link" href="/notes">
-                <i class="fas fa-bell icon-box text-white"></i>
+            <a class="icon-link" href="/notes">
+                <i class="bi bi-bell fs-4"></i>
             </a>
         </div>
     </div>
