@@ -30,15 +30,6 @@ app.get('/welcome', (req, res) => {
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 
-app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-  
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required.' });
-    }
-  
-  });
-
 
 // *****************************************************
 //                    Register
@@ -93,45 +84,23 @@ app.use(
   })
 );
 
-
-
-// Authentication Required
-
-
-  
-app.get('/register', (req, res) => {
-    res.render('pages/register'); //this will call the /anotherRoute route in the API
-}); 
-
-
+// Authentication Required  
 app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+    const { username, password } = req.body;
+  
+    // Validate that both username and password are provided
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required.' });
+    }
+  
+    // Simulating successful registration without database logic
+    res.status(201).json({ message: 'User registered successfully!' });
+  });
 
-  // Ensure username and password are provided
-  if (!username || !password) {
-      return res.redirect('/register'); // Redirect back if input is missing
-  }
-
-  try {
-      // Check if the username already exists
-      const existingUser = await db.query('SELECT * FROM users WHERE username = $1', [username]);
-      if (existingUser.length > 0) {
-          return res.redirect('/register'); // Redirect if username already exists
-      }
-
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Insert new user into the database
-      const query = "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *";
-      const values = [username, hashedPassword];
-
-      const result = await db.query(query, values);
-
-      // Redirect to login page on successful registration
-      res.redirect('/login');
-  } catch (err) {
-      console.error("Database Error:", err.message);
-      res.redirect('/register'); // Redirect on failure
-  }
-});
+// *****************************************************
+// <!-- Section 5 : Start Server-->
+// *****************************************************
+// starting the server and keeping the connection open to listen for more requests
+app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`);
+  });
