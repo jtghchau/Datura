@@ -15,6 +15,8 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(express.json());
+
 // *****************************************************
 //                    API Routes
 // *****************************************************
@@ -25,10 +27,12 @@ app.get('/', (req, res) => {
 
 app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
-  });
+});
 
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
+
+
 
 
 // *****************************************************
@@ -92,15 +96,23 @@ app.post('/register', async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required.' });
     }
-  
+
     // Simulating successful registration without database logic
     res.status(201).json({ message: 'User registered successfully!' });
   });
 
 // *****************************************************
-// <!-- Section 5 : Start Server-->
+//               login
 // *****************************************************
-// starting the server and keeping the connection open to listen for more requests
-app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
-  });
+
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required.' });
+  }
+
+  return res.status(200).json({ message: 'Login successful' });
+});
+
