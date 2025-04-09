@@ -29,6 +29,21 @@ describe('Server!', () => {
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
+//Postitive /register test
+describe('POST /register Positive Case', () => {
+  it('This test case should pass and return a status 200 along with a Success message.', done => {
+    chai
+      .request(server)
+      .post('/register')
+      .send({ username: 'testuser', password: 'testpass' })
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.equal('Registration successful');
+        done();
+      });
+  });
+});
+
 //Negative /register unit test
 describe('POST /register (Negative Case)', () => {
     it('should return 400 when required fields are missing', done => {
