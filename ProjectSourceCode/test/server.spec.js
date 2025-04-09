@@ -31,14 +31,14 @@ describe('Server!', () => {
 
 //Postitive /register test
 describe('POST /register Positive Case', () => {
-  it('This test case should pass and return a status 200 along with a Success message.', done => {
+  it('This test case should pass and return a status 201 along with a Success message.', done => {
     chai
       .request(server)
       .post('/register')
       .send({ username: 'testuser', password: 'testpass' })
       .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.message).to.equal('Registration successful');
+        expect(res).to.have.status(201);
+        expect(res.body.message).to.equal('User registered successfully!');
         done();
       });
   });
