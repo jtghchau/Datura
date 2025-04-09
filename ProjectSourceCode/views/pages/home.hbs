@@ -29,6 +29,37 @@
             font-size: 24px;
             margin-left: 15px;
         }
+
+        .dropdown {
+            display: flex;
+            justify-content: center;
+        }
+
+        .subject-btn {
+            background-color: white;
+            color: #000;
+            border-radius: 25px;
+            width: 200px; /* fixed width */
+            text-align: left;
+            border: none;
+            padding: 10px 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .placeholder-text {
+            color: #999; /* lighter gray for "Select Subject" */
+        }
+
+        .custom-dropdown {
+            border-radius: 25px;
+            width: 200px; /* match button width */
+            border: none;
+            overflow: hidden;
+        }
+
+        .dropdown-item {
+            color: #000;
+        }
     </style>
 
 </head>
@@ -55,7 +86,32 @@
         </div>
     </div>
 
+    <div class="dropdown">
+        <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <span id="selectedSubject" class="placeholder-text">Select Subject</span>
+        </button>
+        <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
+            <li><a class="dropdown-item" href="#" data-value="Math">Math</a></li>
+            <li><a class="dropdown-item" href="#" data-value="English">English</a></li>
+            <li><a class="dropdown-item" href="#" data-value="History">History</a></li>
+        </ul>
+    </div>
+
+
     {{> avatar}}
+
+
+    <script>
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', event => {
+                const selected = event.target.getAttribute('data-value');
+                const subjectSpan = document.getElementById('selectedSubject');
+                subjectSpan.textContent = selected;
+                subjectSpan.classList.remove('placeholder-text'); // make text black
+             });
+        });
+    </script>
+
 
 </body>
 </html>
