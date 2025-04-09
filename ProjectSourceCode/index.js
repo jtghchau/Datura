@@ -30,6 +30,15 @@ app.get('/welcome', (req, res) => {
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 
+app.post('/register', async (req, res) => {
+    const { username, password } = req.body;
+  
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required.' });
+    }
+  
+  });
+
 
 // *****************************************************
 //                    Register
