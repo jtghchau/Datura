@@ -71,7 +71,6 @@ describe('POST /login (positive Case)', () => {
     chai
       .request(server)
       .post('/login')
-      .set('Content-Type', 'application/json') // tells app it's an API request
       .send({ username: 'johndoe', password: 'pass123' })
       .end((err, res) => {
         expect(res).to.have.status(200);
