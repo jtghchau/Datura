@@ -1,11 +1,11 @@
-#User
+-- User
 CREATE TABLE users (
     username VARCHAR(50) PRIMARY KEY,
     password VARCHAR(60) NOT NULL,
     coins INTEGER DEFAULT 0
 );
 
-#Goals
+-- Goals
 CREATE TABLE goals (
     goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50),
@@ -17,7 +17,7 @@ CREATE TABLE goals (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
-#Study 
+-- Study 
 CREATE TABLE sessions (
     session_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50),
@@ -28,7 +28,7 @@ CREATE TABLE sessions (
     FOREIGN KEY (goal_id) REFERENCES goals(goal_id)
 );
 
-#Clothes/Store
+-- Clothes/Store
 CREATE TABLE clothing_items (
     item_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE user_clothing (
     FOREIGN KEY (item_id) REFERENCES clothing_items(item_id)
 );
 
-#Themes
+-- Themes
 CREATE TABLE themes (
     theme_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE user_themes (
 );
 
 
-#Notes
+-- Notes
 CREATE TABLE study_notes (
     note_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50),
@@ -69,7 +69,7 @@ CREATE TABLE study_notes (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
-#Calender
+-- Calender
 CREATE TABLE calendar_events (
     event_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50),
@@ -80,7 +80,7 @@ CREATE TABLE calendar_events (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
-#Friends
+-- Friends
 CREATE TABLE friends (
     username VARCHAR(50),
     friend_username VARCHAR(50),
@@ -90,7 +90,7 @@ CREATE TABLE friends (
     FOREIGN KEY (friend_username) REFERENCES users(username)
 );
 
-#Leaderboards
+-- Leaderboards
 CREATE TABLE leaderboards (
     leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
