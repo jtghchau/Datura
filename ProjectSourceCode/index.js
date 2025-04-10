@@ -146,12 +146,36 @@ app.post('/friends/add', async (req, res) => {
         RETURNING *;`;
         const result = await db.one(query, [req.session.user.user_id, username]);
         console.log(`Friend added successfully`);
-        res.redirect('/friends');
+        res.redirect('/friends?success=true');
     } catch (error) {
         console.error(error);
         res.status(400);
     }
 });
+
+app.post('/friends/remove', async (req, res) => {
+    const username = req.body.username;
+
+    if (!username || !req.session.user) {
+        return res.status(400);
+    }
+
+    try {
+        const query = `
+            DELETE FROM friends
+            WHERE user_id = $1 AND friend_username = $2;
+        `;
+        await db.none(query, [req.session.user.user_id, username]);
+        console.log(`Friend removed successfully`);
+        res.redirect('/friends');
+    } catch (error) {
+        console.error(error);
+        res.status(500);
+    }
+});
+
+
+
 
 // *****************************************************
 //                    About Us
