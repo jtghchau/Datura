@@ -25,6 +25,14 @@ app.get('/', (req, res) => {
     res.render('pages/home');
 });
 
+app.get('/register', (req, res) => {
+    res.render('pages/register');
+});
+
+app.get('/login', (req, res) => {
+    res.render('pages/login');
+});
+
 app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
 });
@@ -93,27 +101,56 @@ app.use(
 // Authentication Required  
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-  
-    // Validate that both username and password are provided
+
     if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required.' });
+        return res.status(400).json({ error: 'Username and password are required.' });
     }
 
-    // Simulating successful registration without database logic
-    res.status(201).json({ message: 'User registered successfully!' });
-  });
+    try 
+    {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+
+        res.redirect('/login');
+    } 
+    catch (error) 
+    {
+        console.error('Registration error:', error);
+        
+        res.redirect('/register');
+    }
+});
+
 
 // *****************************************************
 //               login
 // *****************************************************
 
 
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+app.post('/login', async (req, res) => 
+    {
+        const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required.' });
-  }
+        try {
+            const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
 
-  return res.status(200).json({ message: 'Login successful' });
-});
+            if (!user) {
+                return res.render('pages/login', { message: 'Incorrect username or password.' });
+            }
+
+            const match = await bcrypt.compare(password, user.password);
+
+            if (!match) {
+                return res.render('pages/login', { message: 'Incorrect username or password.' });
+            }
+
+            req.session.user = user;
+            req.session.save(() => res.redirect('/home'));
+        } 
+        catch (error) 
+        {
+            console.error(error);
+            res.render('pages/login', { message: 'Something went wrong. Please try again.' });
+        }
+    });
