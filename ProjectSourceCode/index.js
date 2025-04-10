@@ -49,10 +49,6 @@ app.get('/friends', (req, res) => {
     res.render('pages/friends');
 });
 
-app.get('/settings', (req, res) => {
-    res.render('pages/friends');
-});
-
 app.get('/login', (req, res) => {
     res.render('pages/login');
 });
