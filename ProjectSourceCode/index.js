@@ -29,6 +29,30 @@ app.get('/register', (req, res) => {
     res.render('pages/register');
 });
 
+app.get('/notes', (req, res) => {
+    res.render('pages/notes');
+});
+
+app.get('/store', (req, res) => {
+    res.render('pages/store');
+});
+
+app.get('/notifications', (req, res) => {
+    res.render('pages/notifications');
+});
+
+app.get('/calendar', (req, res) => {
+    res.render('pages/calendar');
+});
+
+app.get('/friends', (req, res) => {
+    res.render('pages/friends');
+});
+
+app.get('/settings', (req, res) => {
+    res.render('pages/friends');
+});
+
 app.get('/login', (req, res) => {
     res.render('pages/login');
 });
