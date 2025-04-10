@@ -85,13 +85,18 @@
         <form action="/friends/add" method="POST">
             <div><label for="friend_user">Add friend</label></div>
             <input type="text" id="friend_user" name="username" placeholder="Username" />
-            <button type="add" id="confirm-btn">Request</button>
+            <button type="submit" id="confirm-btn">Request</button>
+            {{#if success}}
+            <span class="status_message" style="margin-left: 1rem; color: rgb(70, 0, 128);">
+                Friend request sent successfully
+            </span>
+            {{/if}}
         </form>
+
     </div>
 
     <form class="friend_users" action="/friends/remove" method="POST">
         <input type="hidden" name="friend_username" />
-
     </form>
 
     <!-- Notes: Need to add remove option as well as invite function 
