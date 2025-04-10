@@ -1,27 +1,105 @@
-Login feature negative test case
+Testing Plans
+Register Feature (Negative Test Case) - Jeremy Chau
+Test Objective: Verify that the system handles missing required fields during registration.
 
-The login feature should allow valid users to authenticate to our website. If password and username our correct the user should be able to access their account, otherwise an error message should be displayed. 
+Test Data:
+Missing Username:
+Username:
+Password: Ilovecoding123
+Missing Password:
+Username: numberonehacker
+Password:
+
+User Activity:
+Navigate to the /register page
+Leave either username or password blank
+Enter the appropriate information for the non-blank section
+Click register button
+
+Test Environment:
+Local Host: Running on a local development machine at localhost:3000
+Database: Local PostgreSQL database running at localhost:5432
+
+Expected Result:
+The system should display an error message indicating that both username and password are required.
+Not move the user to the login page
+
+Test Results:
+Passed
+Output: Did what was intended and sent an error message
+
+Register Feature (Positive Case) - Celaena Thomas
+Test Objective: To check to make sure that on a successful registration it passes both username and password along with a 200 code and a success message.
+
+Test Data:
+Username = testuser
+Password = testpass
+
+User Activity:
+	Go to the registration page, fill in both blanks as requested, and click register.
+
+Test Environment:
+	Website: localhost:3000
+	Database: localhost:5432
+
+Expected Result:
+	Should display 200 and a successful registration message and move the user to the login page
+
+Test Results:
+	Displayed a 200 message along with a successful registration message. 
+
+
+Login feature (negative test case)  - Sofie Ravnborg
+
+Test objective:
+ The login feature should allow valid users to authenticate to our website. If the password and username are correct the user should be able to access their account, otherwise an error message should be displayed. 
 
 Specific test cases:
-·      The test case should check for missing inputs, either missing password or username. If a user leaves password or username blank- this should display an error message.
-·      The test case should check for invalid credentials, either invalid username or invalid password. If a user either leaves an invalid username or password- this should display an error message. 
+·      The test case should check for missing inputs, either missing password or username. If a user leaves password or username blank- this should display an error message.
+·      The test case should check for invalid credentials, either invalid username or invalid password. If a user either leaves an invalid username or password- this should display an error message. 
 
-To be able to test invalid password for example a temporary user would be needed to be input to the database. This temporary user will be tested for against the invalid credentials.
-username: 'testuser'
-password: 'testpass123'
+Test data:
+Missing username
+Username: (empty)
+Password: TestPassword123
 
-Test environment: Local host 3000 server will be used.
-·      Success Criteria:
-o   The system should reject login attempts where the username or password is missing.
-o   The system should reject login attempts where the username is invalid or the password is incorrect.
-o   The system should display the appropriate error message in each case.
-·      Failure Criteria:
-o   If the system allows login with invalid or incomplete credentials, this would be a failure.
-o   The system should not crash or display unexpected behavior when invalid data is entered.
+Test environment:
+ Website: Local host:3000
+ Database: Local host:5432
 
-The user acceptance test will be performed by a CU boulder student. More specifically decided later. 
 
-Observations on test results.
-	•	Test Case 1 (Missing Username): Did the system return the correct error message, and did it prevent login?
-	•	Test Case 2 (Invalid Username): Did the system prevent login and return the correct error message for an invalid username?
-	•	Test Case 3 (Invalid Password): Did the system prevent login with an invalid password and display the appropriate error message?
+Expected result:
+Success Criteria:
+The system should reject login attempts where the username or password is missing.
+The system should display the appropriate error message 
+Failure Criteria:
+ If the system allows login with invalid or incomplete credentials, this would be a failure.
+The system should not crash or display unexpected behavior when invalid data is entered.
+
+Test result:
+	The test passed and displayed the expected 400 status code.
+
+Login Feature (Positive Test Case) - Estella Duong
+Test Objective: Verify that the user inputs valid credentials for username and password in order to login. 
+
+Test Data:
+Username: johndoe
+Passowrd: pass123
+
+User Activity:
+Navigate to /login page
+Enter a valid username and password in the corresponding fields
+Click the “login” button
+
+Test Environment: 
+Local Host: Running on a local development machine at localhost:3000
+Database: Local PostgreSQL database running at localhost:5432
+
+Expected result: 
+The system should return a status code of 200
+The response body indicating login successful
+The user will be redirected to the home page and can have access to the app 
+
+Test Results:
+The test passes
+Output: Returns 200 status with message showing that login was successful
