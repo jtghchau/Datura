@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Datura - Settings</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #d0eaff;
+      color: #ecf0f1;
+      margin: 0;
+      padding: 0;
+    }
+
+    .settings-container {
+      width: 100%;
+      max-width: 500px;
+      margin: 50px auto;
+      background-color:#a8d8ff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header Section */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #ecf0f1;
+    }
+
+    .header h1 span {
+      color: #2ecc71; /* Highlighting Datura with an accent color */
+    }
+
+    /* Button Styles */
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin: 0.8rem 0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #7f8c8d; /* Base gray color */
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #95a5a6; /* Slightly lighter gray for hover effect */
+    }
+
+    /* Optional Specific Button Classes for More Control */
+    .delete-profile-btn {
+      background-color: #7f8c8d; /* Red for delete button */
+    }
+
+    .delete-profile-btn:hover {
+      background-color:  #95a5a6; /* Darker red on hover */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="settings-container">
+    <div class="header">
+      <h1><span>Datura</span> Settings</h1>
+    </div>
+
+    <div class="setting-group">
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      <button class="change-password-btn" onclick="handleChangePassword()">Change Password</button>
+      <button class="delete-profile-btn" onclick="handleDeleteProfile()">Delete Profile</button>
+      
+      <!-- More Settings Buttons -->
+      <button class="basic-setting-btn" onclick="handleNotificationSettings()">Notification Settings</button>
+      <button class="basic-setting-btn" onclick="handlePrivacySettings()">Privacy Settings</button>
+    </div>
+  </div>
+
+  <script>
+    function handleLogout() {
+      // Replace with real logout logic
+      alert('Logging out...');
+    }
+
+    function handleChangePassword() {
+      // Replace with real password change logic
+      alert('Redirecting to change password...');
+    }
+
+    function handleDeleteProfile() {
+      // Confirm and then delete
+      if (confirm('Are you sure you want to delete your profile?')) {
+        alert('Profile deleted');
+      }
+    }
+
+    function handleNotificationSettings() {
+      alert('Opening notification settings...');
+    }
+
+    function handlePrivacySettings() {
+      alert('Opening privacy settings...');
+    }
+  </script>
+
+</body>
+</html>
