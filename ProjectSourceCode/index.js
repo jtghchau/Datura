@@ -22,7 +22,7 @@ app.use(express.json());
 // *****************************************************
 
 app.get('/', (req, res) => {
-    res.render('pages/home');
+    res.render('pages/register');
 });
 
 app.get('/register', (req, res) => {
