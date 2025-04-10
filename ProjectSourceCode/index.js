@@ -101,26 +101,34 @@ app.use(
 // Authentication Required  
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-
+  
     if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required.' });
+      return res.render('pages/register', {
+        error: 'Username and password are required.',
+        username: username
+      });
     }
-
-    try 
-    {
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
-
-        res.redirect('/login');
-    } 
-    catch (error) 
-    {
-        console.error('Registration error:', error);
-        
-        res.redirect('/register');
+  
+    try {
+      const userExists = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+      if (userExists) {
+        return res.render('pages/register', {
+          error: 'Username already exists.',
+          username: username
+        });
+      }
+  
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+      res.redirect('/login');
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.render('pages/register', {
+        error: 'Registration failed. Please try again.',
+        username: username
+      });
     }
-});
+  });
 
 
 // *****************************************************
@@ -128,29 +136,35 @@ app.post('/register', async (req, res) => {
 // *****************************************************
 
 
-app.post('/login', async (req, res) => 
-    {
-        const { username, password } = req.body;
-
-        try {
-            const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
-
-            if (!user) {
-                return res.render('pages/login', { message: 'Incorrect username or password.' });
-            }
-
-            const match = await bcrypt.compare(password, user.password);
-
-            if (!match) {
-                return res.render('pages/login', { message: 'Incorrect username or password.' });
-            }
-
-            req.session.user = user;
-            req.session.save(() => res.redirect('/home'));
-        } 
-        catch (error) 
-        {
-            console.error(error);
-            res.render('pages/login', { message: 'Something went wrong. Please try again.' });
-        }
-    });
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+  
+    try {
+      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+  
+      if (!user) {
+        return res.render('pages/login', { 
+          error: 'Incorrect username or password.',
+          username: username 
+        });
+      }
+  
+      const match = await bcrypt.compare(password, user.password);
+  
+      if (!match) {
+        return res.render('pages/login', { 
+          error: 'Incorrect username or password.',
+          username: username 
+        });
+      }
+  
+      req.session.user = user;
+      req.session.save(() => res.redirect('/home'));
+    } catch (error) {
+      console.error(error);
+      res.render('pages/login', { 
+        error: 'Something went wrong. Please try again.',
+        username: username
+      });
+    }
+  });
