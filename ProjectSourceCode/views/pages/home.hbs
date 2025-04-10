@@ -27,19 +27,38 @@
         }
 
         .home-icons {
-            display: flex;
-            align-items: center;  /* Vertically center icons */
-            height: 100%; /* Ensure it fills the height of the parent */
+            gap: 7px;
+            padding-top: 0px !important;
         }
 
         .home-icons .icon-link {
-            color: white;
-            margin-right: 1rem;
-            margin-top: auto;
-            margin-bottom: auto;
+            /*color: white;*/
+            background-color: rgba(255, 255, 255, 0.75);
+            padding: 7px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Vertically center the icon */
+            line-height: 1; 
+            margin-right: auto;
         }
-        .home-icons .icon-link:last-child {
-            margin-right: 0;
+
+        .home-icons .icon-link i {
+            font-size: 24px; /* Adjust icon size if needed */
+            display: inline-block; 
+        }
+
+        .btn-light {
+            color: white !important;
+            background: none;
+            border: none;
+            padding: 0;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-light:hover {
+            color: gray !important;
+            background: none;
         }
 
         .dropdown {
@@ -51,7 +70,7 @@
             background-color: white;
             color: #000;
             border-radius: 25px;
-            width: 200px; /* fixed width */
+            min-width: 200px; 
             text-align: left;
             border: none;
             padding: 5px 10px;
@@ -66,7 +85,6 @@
             font-family: 'Bootstrap Icons'; /* Ensure the correct font family is used for the icon */
             margin-left: 10px; /* Space between text and the arrow */
         }
-
 
         .placeholder-text {
             color: #999; /* lighter gray for "Select Subject" */
@@ -83,6 +101,16 @@
             color: #000;
             font-size: 0.9rem;
         }
+
+        @media (max-width: 363px) {
+            .subject-btn {
+                min-width: 156px;
+            }
+
+            .custom-dropdown {
+                width: 156px;
+            }
+        }
     </style>
 
 </head>
@@ -95,29 +123,35 @@
             <span>100000</span>
         </div>
 
-        <!-- Icons -->
-        <div class="home-icons">
-            <a class="icon-link" href="/notes">
-                <i class="bi bi-journal-bookmark fs-4"></i>
-            </a>
-            <a class="icon-link" href="/notes">
-                <i class="bi bi-bag fs-4"></i>
-            </a>
-            <a class="icon-link" href="/notes">
-                <i class="bi bi-bell fs-4"></i>
-            </a>
+    <div class="dropdown-container d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <span id="selectedSubject" class="placeholder-text">Select Subject</span>
+            </button>
+            <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
+                <li><a class="dropdown-item" href="#" data-value="Math">Math</a></li>
+                <li><a class="dropdown-item" href="#" data-value="English">English</a></li>
+                <li><a class="dropdown-item" href="#" data-value="History">History</a></li>
+            </ul>
         </div>
-    </div>
-
-    <div class="dropdown">
-        <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <span id="selectedSubject" class="placeholder-text">Select Subject</span>
+        <button class="btn btn-light d-flex align-items-center justify-content-center" id="addSubjectBtn">
+            <i class="bi bi-plus-lg fs-5"></i>
         </button>
-        <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
-            <li><a class="dropdown-item" href="#" data-value="Math">Math</a></li>
-            <li><a class="dropdown-item" href="#" data-value="English">English</a></li>
-            <li><a class="dropdown-item" href="#" data-value="History">History</a></li>
-        </ul>
+    </div>
+    </div>
+        
+
+    <!-- Icons -->
+    <div class="home-icons d-flex flex-column align-items-center p-3">
+        <a class="icon-link" href="/notes">
+            <i class="bi bi-journal-bookmark-fill fs-5" style="color: rgb(91, 91, 91);"></i>
+        </a>
+        <a class="icon-link" href="/store">
+            <i class="bi bi-handbag-fill fs-5" style="color: rgb(255, 132, 228);"></i>
+        </a>
+        <a class="icon-link" href="/notifications">
+            <i class="bi bi-bell-fill fs-5" style="color: rgb(255, 194, 27);"></i>
+        </a>
     </div>
 
 
