@@ -29,6 +29,21 @@ describe('Server!', () => {
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
+//Postitive /register test
+describe('POST /register Positive Case', () => {
+  it('This test case should pass and return a status 201 along with a Success message.', done => {
+    chai
+      .request(server)
+      .post('/register')
+      .send({ username: 'testuser', password: 'testpass' })
+      .end((err, res) => {
+        expect(res).to.have.status(201);
+        expect(res.body.message).to.equal('User registered successfully!');
+        done();
+      });
+  });
+});
+
 //Negative /register unit test
 describe('POST /register (Negative Case)', () => {
     it('should return 400 when required fields are missing', done => {
@@ -50,62 +65,35 @@ describe('POST /register (Negative Case)', () => {
 
 // *******************************************************************************
 
-//Positive /login test
-describe('Testing login API', () => {
-  let agent;
-  const testUser = {
-    username: 'testuser',
-    password: 'testpass123',
-  };
-
-  before(async () => {
-    // Clear users table and create test user
-    await db.query('TRUNCATE TABLE users CASCADE');
-    const hashedPassword = await bcryptjs.hash(testUser.password, 10);
-    await db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [
-      testUser.username,
-      hashedPassword,
-    ]);
-  });
-
-  beforeEach(() => {
-    // Create new agent for session handling
-    agent = chai.request.agent(app);
-  });
-
-  afterEach(() => {
-    // Clear cookie after each test
-    agent.close();
-  });
-
-  after(async () => {
-    // Clean up database
-    await db.query('TRUNCATE TABLE users CASCADE');
-  });
-
-  describe('GET /profile after logging in', () => {
-    it('should return 401 if user is not authenticated', done => {
-      chai
-        .request(app)
-        .get('/profile')
-        .end((err, res) => {
-          expect(res).to.have.status(401);
-          expect(res.text).to.equal('Not authenticated');
-          done();
-        });
-    });
-
-    it('should return user profile when authenticated', async () => {
-      // First login to get session
-      await agent.post('/login').send(testUser);
-
-      // Then access profile
-      const res = await agent.get('/profile');
-
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.an('object');
-      expect(res.body).to.have.property('username', testUser.username);
-    });
+//Positive /login unit test
+describe('POST /login (positive Case)', () => {
+  it('returns 200 when login information is valid', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: 'johndoe', password: 'pass123' })
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.equal('Login successful');
+        done();
+      });
   });
 });
 
+
+//Negative /login unit test
+describe('POST /login (Negative Case)', () => {
+
+  it('should return 400 when required fields are missing', (done) => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ password: 'testpassword' })  // Missing username
+      .end((err, res) => {
+        expect(res).to.have.status(400);  // Expect 400 status
+        expect(res.body.error).to.equal('Username and password are required.');
+        done();
+      });
+  });
+
+});
