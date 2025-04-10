@@ -22,7 +22,39 @@ app.use(express.json());
 // *****************************************************
 
 app.get('/', (req, res) => {
-    res.render('pages/home');
+    res.render('pages/register');
+});
+
+app.get('/register', (req, res) => {
+    res.render('pages/register');
+});
+
+app.get('/notes', (req, res) => {
+    res.render('pages/notes');
+});
+
+app.get('/store', (req, res) => {
+    res.render('pages/store');
+});
+
+app.get('/notifications', (req, res) => {
+    res.render('pages/notifications');
+});
+
+app.get('/calendar', (req, res) => {
+    res.render('pages/calendar');
+});
+
+app.get('/friends', (req, res) => {
+    res.render('pages/friends');
+});
+
+app.get('/settings', (req, res) => {
+    res.render('pages/friends');
+});
+
+app.get('/login', (req, res) => {
+    res.render('pages/login');
 });
 
 app.get('/welcome', (req, res) => {
@@ -99,15 +131,35 @@ app.use(
 // Authentication Required  
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-
-    // Validate that both username and password are provided
+  
     if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required.' });
+      return res.render('pages/register', {
+        error: 'Username and password are required.',
+        username: username
+      });
     }
+  
+    try {
+      const userExists = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+      if (userExists) {
+        return res.render('pages/register', {
+          error: 'Username already exists.',
+          username: username
+        });
+      }
+  
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+      res.redirect('/login');
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.render('pages/register', {
+        error: 'Registration failed. Please try again.',
+        username: username
+      });
+    }
+  });
 
-    // Simulating successful registration without database logic
-    res.status(201).json({ message: 'User registered successfully!' });
-});
 
 // *****************************************************
 //               login
@@ -116,54 +168,33 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required.' });
-    }
-
-    return res.status(200).json({ message: 'Login successful' });
-});
-
-
-
-
-// *****************************************************
-//                    Friends
-// *****************************************************
-
-app.get('/friends', (req, res) => {
-    res.render('pages/friends')
-
-});
-
-
-app.post('/friends/add', async (req, res) => {
-    const username = req.body;
-
-    if (!username || !req.session.user) {
-        return res.status(400);
-    }
-
+  
     try {
-        const query = `
-        INSERT INTO friends (user_id, friend_username)
-        VALUES ($1, $2)
-        RETURNING *;`;
-        const result = await db.one(query, [req.session.user.user_id, username]);
-        console.log(`Friend added successfully`);
-        res.redirect('/friends');
+      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+  
+      if (!user) {
+        return res.render('pages/login', { 
+          error: 'Incorrect username or password.',
+          username: username 
+        });
+      }
+  
+      const match = await bcrypt.compare(password, user.password);
+  
+      if (!match) {
+        return res.render('pages/login', { 
+          error: 'Incorrect username or password.',
+          username: username 
+        });
+      }
+  
+      req.session.user = user;
+      req.session.save(() => res.redirect('/home'));
     } catch (error) {
-        console.error(error);
-        res.status(400);
+      console.error(error);
+      res.render('pages/login', { 
+        error: 'Something went wrong. Please try again.',
+        username: username
+      });
     }
-});
-
-// *****************************************************
-//                    About Us
-// *****************************************************
-
-
-app.get('/aboutus', (req, res) => {
-    res.render('pages/aboutus')
-
-});
+  });
