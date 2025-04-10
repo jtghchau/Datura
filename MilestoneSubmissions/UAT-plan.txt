@@ -1,0 +1,27 @@
+Login feature negative test case
+
+The login feature should allow valid users to authenticate to our website. If password and username our correct the user should be able to access their account, otherwise an error message should be displayed. 
+
+Specific test cases:
+·      The test case should check for missing inputs, either missing password or username. If a user leaves password or username blank- this should display an error message.
+·      The test case should check for invalid credentials, either invalid username or invalid password. If a user either leaves an invalid username or password- this should display an error message. 
+
+To be able to test invalid password for example a temporary user would be needed to be input to the database. This temporary user will be tested for against the invalid credentials.
+username: 'testuser'
+password: 'testpass123'
+
+Test environment: Local host 3000 server will be used.
+·      Success Criteria:
+o   The system should reject login attempts where the username or password is missing.
+o   The system should reject login attempts where the username is invalid or the password is incorrect.
+o   The system should display the appropriate error message in each case.
+·      Failure Criteria:
+o   If the system allows login with invalid or incomplete credentials, this would be a failure.
+o   The system should not crash or display unexpected behavior when invalid data is entered.
+
+The user acceptance test will be performed by a CU boulder student. More specifically decided later. 
+
+Observations on test results.
+	•	Test Case 1 (Missing Username): Did the system return the correct error message, and did it prevent login?
+	•	Test Case 2 (Invalid Username): Did the system prevent login and return the correct error message for an invalid username?
+	•	Test Case 3 (Invalid Password): Did the system prevent login with an invalid password and display the appropriate error message?
