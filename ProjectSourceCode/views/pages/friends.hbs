@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends</title>
+    <style>
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .friends {
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            /*scrolling if there are multiple friends*/
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        /*friend user rows*/
+        .friend_users {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .friend_users span {
+            /*usernames aligned to left*/
+            flex: 1;
+            text-align: left;
+        }
+
+        /*buttons for friend actions*/
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .actions button {
+            width: 2rem;
+            height: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+
+
+
+</head>
+
+<body>
+    <h1>FRIENDS</h1>
+
+    <div class="friends" id="friends_list">
+
+        <div class="friend_users" username="User1">
+            <span>User1</span>
+            <div class="actions">
+                <button class="invite-btn">+</button>
+                <button class="remove-btn">-</button>
+            </div>
+        </div>
+        <div class="friend_users" username="User2">
+            <span>User2</span>
+            <div class="actions">
+                <button class="invite-btn">+</button>
+                <button class="remove-btn">-</button>
+            </div>
+        </div>
+
+        <form action="/friends/add" method="POST">
+            <div><label for="friend_user">Add friend</label></div>
+            <input type="text" id="friend_user" name="username" placeholder="Username" />
+            <button type="add" id="confirm-btn">Request</button>
+        </form>
+    </div>
+
+    <!-- Notes: Need to add remove option as well as invite function 
+    Need to make the add button work. Need friends database-->
+
+
+</body>
+
+</html>
