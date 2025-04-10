@@ -126,7 +126,6 @@ app.post('/login', async (req, res) => {
 //                    Friends
 // *****************************************************
 
-
 app.get('/friends', (req, res) => {
     res.render('pages/friends')
 
@@ -152,4 +151,14 @@ app.post('/friends/add', async (req, res) => {
         console.error(error);
         res.status(400);
     }
+});
+
+// *****************************************************
+//                    About Us
+// *****************************************************
+
+
+app.get('/aboutus', (req, res) => {
+    res.render('pages/aboutus')
+
 });

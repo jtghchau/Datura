@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <style>
+        body {
+            font-family: 'Playfair Display', 'Georgia', serif;
+            /*font*/
+            background-color: #ebe9ecf5;
+            margin: 0;
+            padding: 0;
+        }
+
+        header h1 {
+            font-family: 'Playfair Display', 'Georgia', serif;
+            font-weight: bold;
+            font-size: 2.5em;
+            color: #2c3e50;
+        }
+
+        header {
+            padding-left: 20px;
+            /*padding to the left of the page so 'about us' isn't at the edge*/
+            margin-bottom: 20px;
+        }
+
+        main {
+            text-align: center;
+        }
+
+        .description {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 1rem;
+            text-align: justify;
+            line-height: 1.6;
+        }
+
+        .left_flower {
+            position: fixed;
+            left: 300px;
+            top: 40%;
+            transform: translateY(-50%);
+        }
+
+        .right_flower {
+            position: fixed;
+            right: 300px;
+            top: 40%;
+            transform: translateY(-50%);
+            /*doesnt affect other page elements/moves from original position vertically/horizontally */
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <h1>About Us</h1>
+    </header>
+
+
+
+    <div class="left_flower">
+        <img src="/images/left_flower.png" alt="left img" style="max-width: 110px; height: auto;" />
+    </div>
+
+    <div class="right_flower">
+        <img src="/images/right_flower.png" alt="right img" style="max-width: 110px; height: auto;" />
+    </div>
+
+    <main>
+
+        <div style="margin-left: 20px; margin-top: 10px; text-align: left;">
+            <button onclick="window.history.back();" class="btn btn-secondary">Back</button>
+            <!-- back button. on click goes back-->
+
+            <section style="text-align: center;">
+                <h2>Developers</h2>
+                <p>Jeremy Chau</p>
+                <p>Carolyn Dockhorn</p>
+                <p>Estella Duong</p>
+                <p>Sofie Ravnborg</p>
+                <p>Celaena Thomas</p>
+            </section>
+
+            <section style="text-align: center; margin-top: 2em;">
+                <h3> Our Vision Statement</h3>
+                <p
+                    style="max-width: 530px; margin: 20px auto; padding: 0 1rem; text-align: justify; line-height: 1.7; text-indent: 2em;">
+                    <!-- 
+                        Notes:
+                        puts constraint on paragraph width
+                        centers horizontally and gives space to top/bottom
+                        adds padding to left/right
+                        more line space
+                        text align justify makes the paragraph edges line up evenly
+                        -->
+                    For students looking to be more disciplined in their studies, Datura is a
+                    life-changing app that encourages productivity and inspires motivation to
+                    complete important tasks. It makes staying on track fun and drastically
+                    improves users' lives.
+                </p>
+
+            </section>
+
+    </main>
+
+</body>
+
+</html>
