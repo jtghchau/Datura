@@ -113,9 +113,13 @@
             }
         }
 
-            .timer-container {
+        .timer-container {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
             text-align: center;
-            margin-top: 30px;
+            
         }
 
         .timer-display {
@@ -143,7 +147,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .start-btn {
+        .start-btn, .pause-btn, .reset-btn {
             padding: 6px 12px;
             font-size: 16px;
             font-weight: bold;
@@ -155,7 +159,9 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .start-btn:hover {
+        .start-btn:hover,
+        .pause-btn:hover,
+        .reset-btn:hover {
             background-color: #ddd;
         }
 
@@ -165,30 +171,50 @@
 
 <script>
     let countdownInterval;
+    let isPaused = false;
+    let remainingSeconds = 0;
 
     function startTimer() {
-        const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
-        const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
-        let totalSeconds = minutes * 60 + seconds;
+        if (!isPaused) {
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            remainingSeconds = minutes * 60 + seconds;
+        }
+        isPaused = false;
 
         clearInterval(countdownInterval); // Reset if already running
 
-        updateDisplay(totalSeconds);
+        updateDisplay(remainingSeconds);
 
         countdownInterval = setInterval(() => {
-            totalSeconds--;
-            if (totalSeconds < 0) {
+            remainingSeconds--;
+            if (remainingSeconds < 0) {
                 clearInterval(countdownInterval);
                 // Optional: play sound or alert
+                // Asked team waiting to see
                 return;
             }
-            updateDisplay(totalSeconds);
+            updateDisplay(remainingSeconds);
         }, 1000);
     }
 
-    function updateDisplay(totalSeconds) {
-        const min = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-        const sec = String(totalSeconds % 60).padStart(2, '0');
+    function pauseTimer() {
+        clearInterval(countdownInterval);
+        isPaused = true;
+    }
+
+    function resetTimer() {
+        clearInterval(countdownInterval);
+        remainingSeconds = 0;
+        isPaused = false;
+        updateDisplay(0);
+        document.getElementById('minutesInput').value = '';
+        document.getElementById('secondsInput').value = '';
+    }
+    
+    function updateDisplay(remainingSeconds) {
+        const min = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
+        const sec = String(remainingSeconds % 60).padStart(2, '0');
         document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
     }
 </script>
@@ -255,6 +281,8 @@
             <input type="number" id="minutesInput" min="0" placeholder="Min" class="timer-input">
             <input type="number" id="secondsInput" min="0" max="59" placeholder="Sec" class="timer-input">
             <button onclick="startTimer()" class="start-btn">Start</button>
+            <button onclick="pauseTimer()" class="pause-btn">Pause</button>
+            <button onclick="resetTimer()" class="reset-btn">Reset</button>
         </div>
     </div>
 </body>
