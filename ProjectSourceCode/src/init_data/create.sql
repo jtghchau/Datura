@@ -17,7 +17,7 @@ CREATE TABLE goals (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
--- Study 
+-- Study (might have to delete this table)
 CREATE TABLE sessions (
     session_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
@@ -43,22 +43,6 @@ CREATE TABLE user_clothing (
     FOREIGN KEY (username) REFERENCES users(username),
     FOREIGN KEY (item_id) REFERENCES clothing_items(item_id)
 );
-
--- Themes
-CREATE TABLE themes (
-    theme_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    name TEXT NOT NULL,
-    cost INTEGER NOT NULL
-);
-
-CREATE TABLE user_themes (
-    username VARCHAR(50),
-    theme_id INTEGER,
-    PRIMARY KEY (username, theme_id),
-    FOREIGN KEY (username) REFERENCES users(username),
-    FOREIGN KEY (theme_id) REFERENCES themes(theme_id)
-);
-
 
 -- Notes
 CREATE TABLE study_notes (
