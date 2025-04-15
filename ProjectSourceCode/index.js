@@ -164,13 +164,15 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-  
+    const testpass = 'password123'
+    const hash = await bcrypt.hash(testpass, 10);
+    console.log('Encrypted password 1:', hash);
     try {
       const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
   
       if (!user) {
         return res.render('pages/login', { 
-          error: 'Incorrect username or password.',
+          error: 'No User Found',
           username: username 
         });
       }
@@ -179,7 +181,7 @@ app.post('/login', async (req, res) => {
   
       if (!match) {
         return res.render('pages/login', { 
-          error: 'Incorrect username or password.',
+          error: 'Incorrect password.',
           username: username 
         });
       }
@@ -194,3 +196,63 @@ app.post('/login', async (req, res) => {
       });
     }
   });
+
+// *****************************************************
+//               Save Study Session API
+// *****************************************************
+
+app.post('/api/sessions', async (req, res) => {
+  const user = req.session.user;
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized. Please log in.' });
+  }
+
+  const { title, start_time, end_time } = req.body;
+
+  if (!start_time || !end_time) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  try {
+    await db.none(
+      'INSERT INTO sessions (username, start_time, end_time) VALUES ($1, $2, $3)',
+      [user.username, start_time, end_time]
+    );
+
+    res.status(201).json({ message: 'Session saved successfully.' });
+  } catch (err) {
+    console.error('Error saving session:', err);
+    res.status(500).json({ error: 'Database error while saving session.' });
+  }
+});
+
+// *****************************************************
+//               Get Study Sessions API
+// *****************************************************
+
+app.get('/api/sessions', async (req, res) => {
+  const user = req.session.user;
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized. Please log in.' });
+  }
+
+  try {
+    const sessions = await db.any(
+      'SELECT session_id, start_time, end_time FROM sessions WHERE username = $1',
+      [user.username]
+    );
+
+    // Format for FullCalendar
+    const formatted = sessions.map(session => ({
+      id: session.session_id,
+      title: 'Study',
+      start: session.start_time,
+      end: session.end_time
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error('Error fetching sessions:', err);
+    res.status(500).json({ error: 'Failed to load sessions' });
+  }
+});
