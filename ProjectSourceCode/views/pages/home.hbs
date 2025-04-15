@@ -14,6 +14,17 @@
             height: 100vh;
         }
 
+        .avatar-container {
+            position: absolute;
+            width: 270px;
+            height: 407px;
+            margin: auto;
+            overflow: hidden;
+            bottom: 36%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         .coin-box {
             display: flex;
             background-color: white;
@@ -113,112 +124,9 @@
             }
         }
 
-        .timer-container {
-            position: fixed;
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            
-        }
-
-        .timer-display {
-            font-size: 64px;
-            font-weight: 600;
-            font-family: 'SF Pro Display', sans-serif;
-            color: white;
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-        }
-
-        .timer-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .timer-input {
-            width: 60px;
-            padding: 6px;
-            font-size: 18px;
-            border-radius: 10px;
-            border: none;
-            text-align: center;
-            outline: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .start-btn, .pause-btn, .reset-btn {
-            padding: 6px 12px;
-            font-size: 16px;
-            font-weight: bold;
-            background-color: white;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .start-btn:hover,
-        .pause-btn:hover,
-        .reset-btn:hover {
-            background-color: #ddd;
-        }
-
     </style>
 
 </head>
-
-<script>
-    let countdownInterval;
-    let isPaused = false;
-    let remainingSeconds = 0;
-
-    function startTimer() {
-        if (!isPaused) {
-            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
-            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
-            remainingSeconds = minutes * 60 + seconds;
-        }
-        isPaused = false;
-
-        clearInterval(countdownInterval); // Reset if already running
-
-        updateDisplay(remainingSeconds);
-
-        countdownInterval = setInterval(() => {
-            remainingSeconds--;
-            if (remainingSeconds < 0) {
-                clearInterval(countdownInterval);
-                // Optional: play sound or alert
-                // Asked team waiting to see
-                return;
-            }
-            updateDisplay(remainingSeconds);
-        }, 1000);
-    }
-
-    function pauseTimer() {
-        clearInterval(countdownInterval);
-        isPaused = true;
-    }
-
-    function resetTimer() {
-        clearInterval(countdownInterval);
-        remainingSeconds = 0;
-        isPaused = false;
-        updateDisplay(0);
-        document.getElementById('minutesInput').value = '';
-        document.getElementById('secondsInput').value = '';
-    }
-    
-    function updateDisplay(remainingSeconds) {
-        const min = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
-        const sec = String(remainingSeconds % 60).padStart(2, '0');
-        document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
-    }
-</script>
-
 
 <body>
     <div class="container-fluid d-flex justify-content-between align-items-center p-3">
@@ -262,28 +170,143 @@
 
     {{> avatar}}
 
+    {{!-- timer --}}
+    <div class="study-timer-container">
+        <h5>Study Timer</h5>
+        <!-- Setup view -->
+        <div id="timerSetup">
+            <div class="timer-inputs">
+                <div>
+                    <p>Hours</p>
+                    <input type="number" id="hoursInput" min="0" max="23" placeholder="00">
+                </div>
+                <div>
+                    <p>Minutes</p>
+                    <input type="number" id="minutesInput" min="0" max="59" placeholder="00">
+                </div>
+                <div>
+                    <button id="startBtn">Start</button>
+                </div>
+            </div>
+        </div>
 
-    <script>
-        document.querySelectorAll('.dropdown-item').forEach(item => {
-            item.addEventListener('click', event => {
-                const selected = event.target.getAttribute('data-value');
-                const subjectSpan = document.getElementById('selectedSubject');
-                subjectSpan.textContent = selected;
-                subjectSpan.classList.remove('placeholder-text'); // make text black
-             });
-        });
-    </script>
-
-    <!-- Timer -->
-    <div class="timer-container d-flex flex-column align-items-center justify-content-center mt-5">
-        <div class="timer-display" id="timerDisplay">00:00</div>
-        <div class="timer-controls d-flex gap-2 mt-2">
-            <input type="number" id="minutesInput" min="0" placeholder="Min" class="timer-input">
-            <input type="number" id="secondsInput" min="0" max="59" placeholder="Sec" class="timer-input">
-            <button onclick="startTimer()" class="start-btn">Start</button>
-            <button onclick="pauseTimer()" class="pause-btn">Pause</button>
-            <button onclick="resetTimer()" class="reset-btn">Reset</button>
+        <!-- Countdown view -->
+        <div id="timerCountdown" style="display: none;">
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="timer-buttons">
+                <button id="restartBtn"><i class="bi bi-x"></i></button>
+                <button id="pauseBtn"><i id="pauseIcon" class="bi bi-pause-fill"></i></i></button>
+            </div>
         </div>
     </div>
+
+    {{!-- style="display: none;" --}}
+    <div id="popupOverlay" class="popup-overlay" style="display: none;">
+        <div id="timerPopup" class="timer-popup">
+            <h2>Time's up!</h2>
+            <p>Great job, you completed your study session. Reset your timer to continue studying or take a break!</p>
+            <button id="closePopupBtn">Close</button>
+        </div>
+    </div>
+
+
+
+    <script>
+        let timer;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let isPaused = false;
+
+        const setupView = document.getElementById('timerSetup');
+        const countdownView = document.getElementById('timerCountdown');
+        const display = document.getElementById('timerDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const hoursInput = document.getElementById('hoursInput');
+        const minutesInput = document.getElementById('minutesInput');
+
+        function formatTime(seconds) {
+            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
+        }
+
+        function updateDisplay() {
+            display.textContent = formatTime(remainingSeconds);
+            const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function startTimer() {
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            totalSeconds = remainingSeconds = hours * 3600 + minutes * 60;
+
+            if (totalSeconds <= 0) return;
+
+            setupView.style.display = 'none';
+            countdownView.style.display = 'block';
+            updateDisplay();
+
+            timer = setInterval(() => {
+            if (!isPaused && remainingSeconds > 0) {
+                remainingSeconds--;
+                updateDisplay();
+                if (remainingSeconds === 0) {
+                clearInterval(timer);
+                document.getElementById('popupOverlay').style.display = 'flex';
+                }
+            }
+            }, 1000);
+        }
+
+        document.getElementById('closePopupBtn').addEventListener('click', () => {
+            document.getElementById('popupOverlay').style.display = 'none';
+            restartTimer();
+        });
+
+
+        function pauseTimer() {
+            isPaused = !isPaused;
+            const pauseIcon = document.getElementById('pauseIcon');
+
+            if (isPaused) {
+                pauseIcon.classList.remove('bi-pause-fill');
+                pauseIcon.classList.add('bi-play-fill');
+            } else {
+                pauseIcon.classList.remove('bi-play-fill');
+                pauseIcon.classList.add('bi-pause-fill');
+            }
+        }
+
+
+        function restartTimer() {
+            clearInterval(timer);
+            remainingSeconds = 0;
+            progressBar.style.width = '0%';
+            isPaused = false;
+
+            // Reset pause icon to default (pause)
+            const pauseIcon = document.getElementById('pauseIcon');
+            pauseIcon.classList.remove('bi-play-fill');
+            pauseIcon.classList.add('bi-pause-fill');
+
+            // Show setup, hide countdown
+            setupView.style.display = 'block';
+            countdownView.style.display = 'none';
+        }
+
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        restartBtn.addEventListener('click', restartTimer);
+        </script>
+
 </body>
 </html>
