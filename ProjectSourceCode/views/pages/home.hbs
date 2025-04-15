@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,8 @@
     <style>
         body {
             background-image: url('/images/background1.png');
-            background-size: cover;  
-            background-position: center; 
+            background-size: cover;
+            background-position: center;
             background-attachment: fixed;
             height: 100vh;
         }
@@ -21,10 +22,14 @@
             border-radius: 25px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .coin-box img {
-            width: 24px; /* Adjust size of the coin image */
-            height: 24px; /* Adjust size of the coin image */
-            margin-right: 4px; /* Space between image and text */
+            width: 24px;
+            /* Adjust size of the coin image */
+            height: 24px;
+            /* Adjust size of the coin image */
+            margin-right: 4px;
+            /* Space between image and text */
         }
 
         .home-icons {
@@ -39,14 +44,16 @@
             border-radius: 50%;
             display: flex;
             justify-content: center;
-            align-items: center; /* Vertically center the icon */
-            line-height: 1; 
+            align-items: center;
+            /* Vertically center the icon */
+            line-height: 1;
             margin-right: auto;
         }
 
         .home-icons .icon-link i {
-            font-size: 24px; /* Adjust icon size if needed */
-            display: inline-block; 
+            font-size: 24px;
+            /* Adjust icon size if needed */
+            display: inline-block;
         }
 
         .btn-light {
@@ -71,29 +78,36 @@
             background-color: white;
             color: #000;
             border-radius: 25px;
-            min-width: 200px; 
+            min-width: 200px;
             text-align: left;
             border: none;
             padding: 5px 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: space-between; /* Ensures the arrow is at the far right */
-            align-items: center; /* Vertically center the text and arrow */
+            justify-content: space-between;
+            /* Ensures the arrow is at the far right */
+            align-items: center;
+            /* Vertically center the text and arrow */
         }
 
         .subject-btn .dropdown-toggle::after {
-            content: '\f107'; /* Unicode for the downward arrow */
-            font-family: 'Bootstrap Icons'; /* Ensure the correct font family is used for the icon */
-            margin-left: 10px; /* Space between text and the arrow */
+            content: '\f107';
+            /* Unicode for the downward arrow */
+            font-family: 'Bootstrap Icons';
+            /* Ensure the correct font family is used for the icon */
+            margin-left: 10px;
+            /* Space between text and the arrow */
         }
 
         .placeholder-text {
-            color: #999; /* lighter gray for "Select Subject" */
+            color: #999;
+            /* lighter gray for "Select Subject" */
         }
 
         .custom-dropdown {
             border-radius: 15px;
-            width: 200px; /* match button width */
+            width: 200px;
+            /* match button width */
             border: none;
             overflow: hidden;
         }
@@ -119,7 +133,7 @@
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
-            
+
         }
 
         .timer-display {
@@ -144,10 +158,12 @@
             border: none;
             text-align: center;
             outline: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .start-btn, .pause-btn, .reset-btn {
+        .start-btn,
+        .pause-btn,
+        .reset-btn {
             padding: 6px 12px;
             font-size: 16px;
             font-weight: bold;
@@ -156,7 +172,7 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .start-btn:hover,
@@ -164,7 +180,6 @@
         .reset-btn:hover {
             background-color: #ddd;
         }
-
     </style>
 
 </head>
@@ -211,7 +226,7 @@
         document.getElementById('minutesInput').value = '';
         document.getElementById('secondsInput').value = '';
     }
-    
+
     function updateDisplay(remainingSeconds) {
         const min = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
         const sec = String(remainingSeconds % 60).padStart(2, '0');
@@ -224,27 +239,28 @@
     <div class="container-fluid d-flex justify-content-between align-items-center p-3">
         <!-- Coins Box -->
         <div class="coin-box">
-            <img src="/images/coin.png" alt="Coin"> 
+            <img src="/images/coin.png" alt="Coin">
             <span>100000</span>
         </div>
 
-    <div class="dropdown-container d-flex align-items-center gap-2">
-        <div class="dropdown">
-            <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <span id="selectedSubject" class="placeholder-text">Select Subject</span>
+        <div class="dropdown-container d-flex align-items-center gap-2">
+            <div class="dropdown">
+                <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <span id="selectedSubject" class="placeholder-text">Select Subject</span>
+                </button>
+                <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
+                    <li><a class="dropdown-item" href="#" data-value="Math">Math</a></li>
+                    <li><a class="dropdown-item" href="#" data-value="English">English</a></li>
+                    <li><a class="dropdown-item" href="#" data-value="History">History</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-light d-flex align-items-center justify-content-center" id="addSubjectBtn">
+                <i class="bi bi-plus-lg fs-5"></i>
             </button>
-            <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
-                <li><a class="dropdown-item" href="#" data-value="Math">Math</a></li>
-                <li><a class="dropdown-item" href="#" data-value="English">English</a></li>
-                <li><a class="dropdown-item" href="#" data-value="History">History</a></li>
-            </ul>
         </div>
-        <button class="btn btn-light d-flex align-items-center justify-content-center" id="addSubjectBtn">
-            <i class="bi bi-plus-lg fs-5"></i>
-        </button>
     </div>
-    </div>
-        
+
 
     <!-- Icons -->
     <div class="home-icons d-flex flex-column align-items-center p-3">
@@ -270,7 +286,7 @@
                 const subjectSpan = document.getElementById('selectedSubject');
                 subjectSpan.textContent = selected;
                 subjectSpan.classList.remove('placeholder-text'); // make text black
-             });
+            });
         });
     </script>
 
@@ -286,4 +302,5 @@
         </div>
     </div>
 </body>
+
 </html>

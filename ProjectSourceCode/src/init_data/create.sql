@@ -90,6 +90,7 @@ CREATE TABLE friends (
     FOREIGN KEY (friend_username) REFERENCES users(username)
 );
 
+
 -- Leaderboards
 CREATE TABLE leaderboards (
     leaderboard_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

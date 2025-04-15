@@ -10,9 +10,15 @@
             font-family: Georgia, 'Times New Roman', Times, serif, sans-serif;
             margin: 0;
             padding: 0;
+            background-image: url('/images/background1.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
         }
 
         .friends {
+            background-color: white;
             max-width: 400px;
             margin: 2rem auto;
             padding: 1rem;
@@ -67,40 +73,73 @@
 
     <div class="friends" id="friends_list">
 
-        <div class="friend_users" username="User1">
-            <span>User1</span>
-            <div class="actions">
-                <button class="invite-btn">+</button>
-                <button class="remove-btn">-</button>
-            </div>
+        {{#if successReq}}
+        <div style="text-align: center; color: green; margin-bottom: 1rem;">
+            Friend request sent
         </div>
-        <div class="friend_users" username="User2">
-            <span>User2</span>
-            <div class="actions">
-                <button class="invite-btn">+</button>
-                <button class="remove-btn">-</button>
-            </div>
-        </div>
+        {{/if}}
 
-        <form action="/friends/add" method="POST">
-            <div><label for="friend_user">Add friend</label></div>
-            <input type="text" id="friend_user" name="username" placeholder="Username" />
-            <button type="submit" id="confirm-btn">Request</button>
-            {{#if success}}
-            <span class="status_message" style="margin-left: 1rem; color: rgb(70, 0, 128);">
-                Friend request sent successfully
-            </span>
-            {{/if}}
+        {{#if error}}
+        <div style="text-align: center; color: red; margin-bottom: 1rem;">{{error}}</div>
+        {{/if}}
+
+        {{#each friends}}
+        <div class="friend_users" username="{{friend_username}}">
+            <span>{{friend_username}}</span>
+            <form class="remove-form" action="/friends/remove" method="POST">
+                <input type="hidden" name="friend_username" value="{{friend_username}}" />
+                <button type="submit" class="remove-btn">-</button>
+            </form>
+        </div>
+        {{/each}}
+
+
+        {{!-- <div class="actions">
+            <button class="invite-btn">+</button>
+            <button class="remove-btn">-</button>
+        </div> --}}
+
+
+        {{#if friend_requests}}
+        <h2 style="text-align: center; margin-top: 1rem;">Friend Requests</h2>
+        {{#each friend_requests}}
+        <div class="friend_users" username="{{username}}">
+            <span>{{username}} sent you a friend request.</span>
+            <form action="/friends/accept" method="POST" style="display:inline;">
+                <input type="hidden" name="requester" value="{{username}}" />
+                <button type="submit">Accept</button>
+            </form>
+            <form action="/friends/decline" method="POST" style="display:inline; margin-left:0.5rem;">
+                <input type="hidden" name="requester" value="{{username}}" />
+                <button type="submit">Decline</button>
+            </form>
+        </div>
+        {{/each}}
+        {{/if}}
+        <form id="friend_request" action="/friends/add" method="POST"
+            style="display: flex; justify-content: center; margin-bottom: 1rem;">
+            <input type="text" name="friend_username" placeholder="Enter username" required
+                style="flex: 1; padding: 0.5rem;" />
+            <button type="submit" style="padding: 0.5rem;">Add Friend</button>
         </form>
 
-    </div>
+        <form class="friend_users" action="/friends/remove" method="POST">
+            <input type="hidden" name="friend_username" />
+        </form>
 
-    <form class="friend_users" action="/friends/remove" method="POST">
-        <input type="hidden" name="friend_username" />
-    </form>
 
-    <!-- Notes: Need to add remove option as well as invite function 
+
+        <!-- Notes: Need to add remove option as well as invite function 
     Need to make the add button work. Need friends database-->
+
+        <!-- TEST USERS:
+    username: login 
+    pass: 123
+
+    username: hello 
+    pass: 123
+    -->
+
 
 
 </body>

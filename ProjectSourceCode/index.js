@@ -166,13 +166,7 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const query = `
-        INSERT INTO friends (user_id, friend_username)
-        VALUES ($1, $2)
-        RETURNING *;`;
-        const result = await db.one(query, [req.session.user.user_id, username]);
-        console.log(`Friend added successfully`);
-        res.redirect('/friends?success=true');
+
         const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
 
         if (!user) {
@@ -202,19 +196,76 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/friends/remove', async (req, res) => {
-    const username = req.body.username;
 
-    if (!username || !req.session.user) {
+
+
+
+// *****************************************************
+//                    Friends
+// *****************************************************
+
+app.get('/friends', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    try {
+        const friends = await db.any(
+            'SELECT friend_username FROM friends WHERE username = $1 AND status = $2',
+            [req.session.user.username, 'accepted']
+        );
+        const friend_requests = await db.any(
+            'SELECT username FROM friends WHERE friend_username = $1 AND status = $2',
+            [req.session.user.username, 'pending']
+        );
+
+        const successReq = req.query.success;
+
+        res.render('pages/friends', { friends, friend_requests, success });
+    } catch (error) {
+        console.error(error);
+        res.render('pages/friends', { error: 'Error getting friends' });
+    }
+});
+
+
+app.post('/friends/add', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    const { friend_username } = req.body;
+
+    try {
+        const queryUserLookup = `SELECT * FROM users WHERE username = $1;`;
+        const friend = await db.oneOrNone(queryUserLookup, [friend_username]);
+        if (!friend) {
+            console.log(`User not found`);
+            return res.render('pages/friends', {
+                error: `Username ${friend_username} not found`
+            });
+        }
+
+        const insertQuery = `INSERT INTO friends (username, friend_username) VALUES ($1, $2) RETURNING *;`;
+        await db.one(insertQuery, [req.session.user.username, friend_username]);
+        res.redirect('/friends?success=true');
+        console.log(`Friend added successfully`);
+    } catch (error) {
+        res.render('pages/friends', { error: 'Unable to add friend' });
+    }
+});
+
+app.post('/friends/remove', async (req, res) => {
+    const friend_username = req.body.friend_username;
+
+    if (!friend_username || !req.session.user) {
         return res.status(400);
     }
 
     try {
-        const query = `
+        const deleteQuery = `
             DELETE FROM friends
-            WHERE user_id = $1 AND friend_username = $2;
+            WHERE username = $1 AND friend_username = $2;
         `;
-        await db.none(query, [req.session.user.user_id, username]);
+        await db.none(deleteQuery, [req.session.user.username, friend_username]);
         console.log(`Friend removed successfully`);
         res.redirect('/friends');
     } catch (error) {
@@ -223,7 +274,59 @@ app.post('/friends/remove', async (req, res) => {
     }
 });
 
+app.get('/friends/accepted', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    try {
+        const friends = await db.any(
+            'SELECT friend_username FROM friends WHERE username = $1 AND status = $2',
+            [req.session.user.username, 'accepted']
+        );
+        res.render('pages/friends', { friends });
+    } catch (error) {
+        console.error(error);
+        res.render('pages/friends', { error: 'Error fetching friends' });
+    }
+});
 
+
+app.post('/friends/accept', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    const requester = req.body.requester;
+    try {
+        const updateQuery = `
+            UPDATE friends
+            SET status = 'accepted'
+            WHERE username = $1 AND friend_username = $2 AND status = 'pending'
+        `;
+        await db.none(updateQuery, [requester, req.session.user.username]);
+        res.redirect('/friends?success=true');
+    } catch (error) {
+        console.error(error);
+        res.render('pages/friends', { error: 'Error accepting' });
+    }
+});
+
+app.post('/friends/decline', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    const requester = req.body.requester;
+    try {
+        const deleteQuery = `
+            DELETE FROM friends
+            WHERE username = $1 AND friend_username = $2 AND status = 'pending'
+        `;
+        await db.none(deleteQuery, [requester, req.session.user.username]);
+        res.redirect('/friends?success=true');
+    } catch (error) {
+        console.error(error);
+        res.render('pages/friends', { error: 'Error declining' });
+    }
+});
 
 
 // *****************************************************
