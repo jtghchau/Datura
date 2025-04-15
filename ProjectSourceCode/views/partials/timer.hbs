@@ -30,6 +30,13 @@
         </div>
     </div>
 
+    {{!-- style="display: none;" --}}
+    <div id="subjectWarning" class="alert" style="display: none;">
+        <span>Please select a Category before starting the timer!</span>
+    </div>
+
+
+
     <div id="popupOverlay" class="popup-overlay" style="display: none;">
         <div id="timerPopup" class="timer-popup">
             <h2>Time's up!</h2>
@@ -56,6 +63,9 @@
         const hoursInput = document.getElementById('hoursInput');
         const minutesInput = document.getElementById('minutesInput');
 
+        // Get the warning message element
+        const subjectWarning = document.getElementById('subjectWarning');
+
         function formatTime(seconds) {
             const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
             const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
@@ -70,6 +80,16 @@
         }
 
         function startTimer() {
+            // Check if a subject is selected
+            if (!selectedSubjectValue) {
+                // If no subject is selected, show the warning message
+                subjectWarning.style.display = 'block';
+                return; // Prevent starting the timer
+            }
+
+            // Hide the warning message if a subject is selected
+            subjectWarning.style.display = 'none';
+
             const hours = parseInt(hoursInput.value) || 0;
             const minutes = parseInt(minutesInput.value) || 0;
             totalSeconds = remainingSeconds = hours * 3600 + minutes * 60;
