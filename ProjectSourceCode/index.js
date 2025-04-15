@@ -49,10 +49,6 @@ app.get('/friends', (req, res) => {
     res.render('pages/friends');
 });
 
-app.get('/settings', (req, res) => {
-    res.render('pages/friends');
-});
-
 app.get('/login', (req, res) => {
     res.render('pages/login');
 });
@@ -64,6 +60,11 @@ app.get('/welcome', (req, res) => {
 app.get('/home', (req, res) => {
     res.render('pages/home');
 });
+
+app.get('/settings', (req, res) => {
+    res.render('pages/settings');
+});
+
 
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');

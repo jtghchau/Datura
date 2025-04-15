@@ -11,6 +11,7 @@
             background-size: cover;  
             background-position: center; 
             background-attachment: fixed;
+            height: 100vh;
         }
 
         .coin-box {
@@ -111,9 +112,113 @@
                 width: 156px;
             }
         }
+
+        .timer-container {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            
+        }
+
+        .timer-display {
+            font-size: 64px;
+            font-weight: 600;
+            font-family: 'SF Pro Display', sans-serif;
+            color: white;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-input {
+            width: 60px;
+            padding: 6px;
+            font-size: 18px;
+            border-radius: 10px;
+            border: none;
+            text-align: center;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .start-btn, .pause-btn, .reset-btn {
+            padding: 6px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: white;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .start-btn:hover,
+        .pause-btn:hover,
+        .reset-btn:hover {
+            background-color: #ddd;
+        }
+
     </style>
 
 </head>
+
+<script>
+    let countdownInterval;
+    let isPaused = false;
+    let remainingSeconds = 0;
+
+    function startTimer() {
+        if (!isPaused) {
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            remainingSeconds = minutes * 60 + seconds;
+        }
+        isPaused = false;
+
+        clearInterval(countdownInterval); // Reset if already running
+
+        updateDisplay(remainingSeconds);
+
+        countdownInterval = setInterval(() => {
+            remainingSeconds--;
+            if (remainingSeconds < 0) {
+                clearInterval(countdownInterval);
+                // Optional: play sound or alert
+                // Asked team waiting to see
+                return;
+            }
+            updateDisplay(remainingSeconds);
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(countdownInterval);
+        isPaused = true;
+    }
+
+    function resetTimer() {
+        clearInterval(countdownInterval);
+        remainingSeconds = 0;
+        isPaused = false;
+        updateDisplay(0);
+        document.getElementById('minutesInput').value = '';
+        document.getElementById('secondsInput').value = '';
+    }
+    
+    function updateDisplay(remainingSeconds) {
+        const min = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
+        const sec = String(remainingSeconds % 60).padStart(2, '0');
+        document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
+    }
+</script>
+
 
 <body>
     <div class="container-fluid d-flex justify-content-between align-items-center p-3">
@@ -169,6 +274,16 @@
         });
     </script>
 
-
+    <!-- Timer -->
+    <div class="timer-container d-flex flex-column align-items-center justify-content-center mt-5">
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="timer-controls d-flex gap-2 mt-2">
+            <input type="number" id="minutesInput" min="0" placeholder="Min" class="timer-input">
+            <input type="number" id="secondsInput" min="0" max="59" placeholder="Sec" class="timer-input">
+            <button onclick="startTimer()" class="start-btn">Start</button>
+            <button onclick="pauseTimer()" class="pause-btn">Pause</button>
+            <button onclick="resetTimer()" class="reset-btn">Reset</button>
+        </div>
+    </div>
 </body>
 </html>
