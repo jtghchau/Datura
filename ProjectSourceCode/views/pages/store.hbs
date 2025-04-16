@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>home</title>
+
+    <style>
+        body {
+            background-image: url('/images/background1.png');
+            background-size: cover;  
+            background-position: center; 
+            background-attachment: fixed;
+            height: 100vh;
+        }
+
+        .coin-box {
+            display: flex;
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 25px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .coin-box img {
+            width: 24px; /* Adjust size of the coin image */
+            height: 24px; /* Adjust size of the coin image */
+            margin-right: 4px; /* Space between image and text */
+        }
+
+        .home-icons {
+            gap: 7px;
+            padding-top: 0px !important;
+        }
+
+        .home-icons .icon-link {
+            /*color: white;*/
+            background-color: rgba(255, 255, 255, 0.75);
+            padding: 7px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Vertically center the icon */
+            line-height: 1; 
+            margin-right: auto;
+        }
+
+        .home-icons .icon-link i {
+            font-size: 24px; /* Adjust icon size if needed */
+            display: inline-block; 
+        }
+
+        .store-container {
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 20px;
+            border-radius: 25px;
+            max-width: 900px;
+            margin: 30px auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 8px 18px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .tab-button.active,
+        .tab-button:hover {
+            background-color: #25a029;
+            color: white;
+            border-color: #25a029;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .item-card {
+            background-color: white;
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .item-card img {
+            width: 100px;
+            height: auto;
+        }
+
+        .item-info {
+            margin-top: 8px;
+        }
+
+        .item-info .coin-icon {
+            width: 16px;
+            vertical-align: middle;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div class="store-container">
+        <h2>Clothing Store</h2>
+        <div class="coin-box">
+            <img src="/images/coin.png" alt="Coin">
+            <span>{{coins}}</span>
+        </div>
+
+        <div class="category-tabs">
+            <button class="tab-button active" data-category="head">Head</button>
+            <button class="tab-button" data-category="body">Body</button>
+            <button class="tab-button" data-category="pants">Pants</button>
+        </div>
+
+        <div class="items-grid" id="itemsGrid">
+        </div>
+    </div>
+</body>
+
+<script>
+    coins = 1000
+    const items = [
+        { id: 'hat1', name: 'Bow', category: 'head', image: '/images/clothing/bow.png', price: 50 },
+        { id: 'hat2', name: 'Sunglasses', category: 'head', image: '/images/clothing/sunglasses.png', price: 75 },
+        { id: 'hat3', name: 'Glasses', category: 'head', image: '/images/clothing/glasses.png', price: 100 },
+        { id: 'hat4', name: 'Moustache', category: 'head', image: '/images/clothing/moustache.png', price: 150 },
+        { id: 'shirt1', name: 'Blue Shirt', category: 'body', image: '/images/clothing/blueShirt.png', price: 50 },
+        { id: 'shirt2', name: 'Pink Shirt', category: 'body', image: '/images/clothing/pinkShirt.png', price: 75 },
+        { id: 'shirt3', name: 'Grey Shirt', category: 'body', image: '/images/clothing/greyShirt.png', price: 100 },
+        { id: 'shirt4', name: 'Lavender Shirt', category: 'body', image: '/images/clothing/lavShirt.png', price: 150 },
+        { id: 'pants1', name: 'Pink Skirt', category: 'pants', image: '/images/clothing/pinkSkirt.png', price: 50 },
+        { id: 'pants2', name: 'Maroon Skirt', category: 'pants', image: '/images/clothing/marSkirt.png', price: 75 },
+        { id: 'pants3', name: 'Blue Skirt', category: 'pants', image: '/images/clothing/bluSkirt.png', price: 100 },
+        { id: 'pants4', name: 'Lavender Skirt', category: 'pants', image: '/images/clothing/lavSkirt.png', price: 150 }
+    ];
+
+    let ownedItems = new Set();
+    let equippedItems = {
+        head: null,
+        body: null,
+        pants: null
+    };
+
+    function renderItems(category) {
+        const container = document.getElementById('itemsGrid');
+        container.innerHTML = '';
+
+        items.filter(item => item.category === category).forEach(item => {
+            const isOwned = ownedItems.has(item.id);
+            const isEquipped = equippedItems[item.category] === item.id;
+
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <div class="item-info">
+                    <p>${item.name}</p>
+                    <p><img src="/images/coin.png" class="coin-icon"> ${item.price}</p>
+                    <button class="buy-btn" ${isOwned ? 'style="display:none;"' : ''}>Buy</button>
+                    <button class="equip-btn" ${!isOwned || isEquipped ? 'style="display:none;"' : ''}>Equip</button>
+                    <button class="unequip-btn" ${isEquipped ? '' : 'style="display:none;"'}>Unequip</button>
+                </div>
+            `;
+
+            const buyBtn = card.querySelector('.buy-btn');
+            const equipBtn = card.querySelector('.equip-btn');
+            const unequipBtn = card.querySelector('.unequip-btn');
+
+            if (buyBtn) {
+                buyBtn.addEventListener('click', () => {
+                    if (coins >= item.price) {
+                        coins -= item.price;
+                        ownedItems.add(item.id);
+                        updateCoinsDisplay();
+                        renderItems(category);
+                    } else {
+                        alert('Not enough coins!');
+                    }
+                });
+            }
+
+            if (equipBtn) {
+                equipBtn.addEventListener('click', () => {
+                    equippedItems[item.category] = item.id;
+                    renderItems(category);
+                    updateAvatar();
+                });
+            }
+
+            if (unequipBtn) {
+                unequipBtn.addEventListener('click', () => {
+                    equippedItems[item.category] = null;
+                    renderItems(category);
+                    updateAvatar();
+                });
+            }
+
+            container.appendChild(card);
+        });
+    }
+
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderItems(btn.dataset.category);
+        });
+    });
+
+    function updateCoinsDisplay() {
+        document.querySelector('.coin-box span').textContent = coins;
+    }
+
+    function updateAvatar() {
+        const avatarContainer = document.querySelector('.avatar-container');
+        const layers = avatarContainer.querySelectorAll('.avatar-layer:not(.base-avatar):not(.avatar-shadow)');
+        layers.forEach(layer => layer.remove());
+
+        Object.values(equippedItems).forEach(id => {
+            if (id) {
+                const item = items.find(it => it.id === id);
+                if (item) {
+                    const img = document.createElement('img');
+                    img.src = item.image;
+                    img.className = 'avatar-layer';
+                    avatarContainer.appendChild(img);
+                }
+            }
+        });
+    }
+</script>
+
+</html>
+
+

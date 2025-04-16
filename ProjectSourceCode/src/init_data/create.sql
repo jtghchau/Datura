@@ -7,30 +7,30 @@ CREATE TABLE users (
 
 -- Goals
 CREATE TABLE goals (
-    goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    goal_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
     title TEXT NOT NULL,
     description TEXT,
-    is_completed BOOLEAN DEFAULT 0,
+    is_completed BOOLEAN DEFAULT false,
     reward_coins INTEGER DEFAULT 10,
-    completed_at DATETIME,
+    completed_at TIMESTAMP,
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
 -- Study 
 CREATE TABLE sessions (
-    session_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
     goal_id INTEGER,
-    start_time DATETIME,
-    end_time DATETIME,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
     FOREIGN KEY (username) REFERENCES users(username),
     FOREIGN KEY (goal_id) REFERENCES goals(goal_id)
 );
 
 -- Clothes/Store
 CREATE TABLE clothing_items (
-    item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name TEXT NOT NULL,
     cost INTEGER NOT NULL
 );
@@ -38,15 +38,26 @@ CREATE TABLE clothing_items (
 CREATE TABLE user_clothing (
     username VARCHAR(50),
     item_id INTEGER,
-    obtained_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (username, item_id),
     FOREIGN KEY (username) REFERENCES users(username),
     FOREIGN KEY (item_id) REFERENCES clothing_items(item_id)
 );
 
+CREATE TABLE equipped_clothing (
+    username VARCHAR(50) PRIMARY KEY,
+    head_item_id INTEGER,
+    body_item_id INTEGER,
+    pants_item_id INTEGER,
+    FOREIGN KEY (username) REFERENCES users(username),
+    FOREIGN KEY (head_item_id) REFERENCES clothing_items(item_id),
+    FOREIGN KEY (body_item_id) REFERENCES clothing_items(item_id),
+    FOREIGN KEY (pants_item_id) REFERENCES clothing_items(item_id)
+);
+
 -- Themes
 CREATE TABLE themes (
-    theme_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    theme_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name TEXT NOT NULL,
     cost INTEGER NOT NULL
 );
@@ -62,21 +73,21 @@ CREATE TABLE user_themes (
 
 -- Notes
 CREATE TABLE study_notes (
-    note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    note_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
     content TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
 -- Calender
 CREATE TABLE calendar_events (
-    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
     title TEXT NOT NULL,
     description TEXT,
-    event_start DATETIME,
-    event_end DATETIME,
+    event_start TIMESTAMP,
+    event_end TIMESTAMP,
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
@@ -92,7 +103,7 @@ CREATE TABLE friends (
 
 -- Leaderboards
 CREATE TABLE leaderboards (
-    leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    leaderboard_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name TEXT NOT NULL,
     created_by VARCHAR(50),
     FOREIGN KEY (created_by) REFERENCES users(username)
