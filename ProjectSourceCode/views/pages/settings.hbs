@@ -74,10 +74,9 @@
     <div class="setting-group">
       <!-- These buttons are connected to JavaScript functions -->
       <button class="logout-btn" onclick="handleLogout()">Logout</button>
-      <button class="change-password-btn" onclick="handleChangePassword()">Change Password</button>
-      <button class="delete-profile-btn" onclick="handleDeleteProfile()">Delete Profile</button>
-      <button class="basic-setting-btn" onclick="handleNotificationSettings()">Notification Settings</button>
-      <button class="basic-setting-btn" onclick="handlePrivacySettings()">Privacy Settings</button>
+      <button class="change-profile-btn " onclick="window.location.href='/changepassword';">Change Password</button>
+      <button class="delete-profile-btn" onclick="confirmDelete()">Delete Profile</button>
+      <button class="change-profile-btn " onclick="window.location.href='/aboutus';">About us</button>
     </div>
   </div>
 
@@ -103,24 +102,31 @@
       }
     }
 
-    // Handle Change Password (Example - This could be extended with form data)
-    function handleChangePassword() {
-      alert('Change Password functionality not implemented yet');
-    }
-
+  
     // Handle Delete Profile (Example - This could be extended with form data)
-    function handleDeleteProfile() {
-      alert('Delete Profile functionality not implemented yet');
+    function confirmDelete() {
+    const isConfirmed = confirm("Are you sure you want to delete your profile? This action cannot be undone.");
+    if (isConfirmed) {
+      deleteProfile();
     }
+  }
 
-    // Handle Notification Settings (Example)
-    function handleNotificationSettings() {
-      alert('Notification Settings functionality not implemented yet');
-    }
+    async function deleteProfile() {
+      try {
+        const response = await fetch('/delete-profile', {
+          method: 'DELETE'
+        });
 
-    // Handle Privacy Settings (Example)
-    function handlePrivacySettings() {
-      alert('Privacy Settings functionality not implemented yet');
+        if (response.ok) {
+          alert('Profile deleted. Redirecting...');
+          window.location.href = '/login';
+        } else {
+          alert('Failed to delete profile.');
+        }
+      } catch (error) {
+        console.error('Error deleting profile:', error);
+        alert('Something went wrong.');
+      }
     }
   </script>
 </body>
