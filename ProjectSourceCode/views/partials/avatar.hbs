@@ -1,51 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>avatar</title>
-
-    <style>
-        .avatar-container {
-            position: absolute;
-            width: 270px;
-            height: 407px;
-            margin: auto;
-            overflow: hidden;
-            bottom: 23%;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .avatar-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: auto;
-        }
-
-        .avatar-shadow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: auto;
-        }
-
-    </style>
-</head>
-
-<body>
-    
-    <div class="avatar-container">
-        <img src="/images/shadow.png" class="avatar-shadow">
-        <img src="/images/avatar1.png" class="avatar-layer base-avatar">
-        {{#each outfitImages}}
-            <img src="{{this}}" class="avatar-layer">
-        {{/each}}
-    </div>
-
-</body>
-</html>
-
+<div class="avatar-container">
+    <img src="/images/shadow.png" class="avatar-shadow">
+    <img src="/images/avatar1.png" class="avatar-layer base-avatar">
+    {{#each outfitImages}}
+        <img src="{{this}}" class="avatar-layer">
+    {{/each}}
+</div>

@@ -1,0 +1,135 @@
+<div class="study-timer-container">
+        <h5>Study Timer</h5>
+        <!-- Setup view -->
+        <div id="timerSetup">
+            <div class="timer-inputs">
+                <div>
+                    <p>Hours</p>
+                    <input type="number" id="hoursInput" min="0" max="23" placeholder="00">
+                </div>
+                <div>
+                    <p>Minutes</p>
+                    <input type="number" id="minutesInput" min="0" max="59" placeholder="00">
+                </div>
+                <div>
+                    <button id="startBtn">Start</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countdown view -->
+        <div id="timerCountdown" style="display: none;">
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="timer-buttons">
+                <button id="restartBtn"><i class="bi bi-x"></i></button>
+                <button id="pauseBtn"><i id="pauseIcon" class="bi bi-pause-fill"></i></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupOverlay" class="popup-overlay" style="display: none;">
+        <div id="timerPopup" class="timer-popup">
+            <h2>Time's up!</h2>
+            <p>Great job, you completed your study session. Reset your timer to continue studying or take a break!</p>
+            <button id="closePopupBtn">Close</button>
+        </div>
+    </div>
+
+
+
+    <script>
+        let timer;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let isPaused = false;
+
+        const setupView = document.getElementById('timerSetup');
+        const countdownView = document.getElementById('timerCountdown');
+        const display = document.getElementById('timerDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const hoursInput = document.getElementById('hoursInput');
+        const minutesInput = document.getElementById('minutesInput');
+
+        function formatTime(seconds) {
+            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
+        }
+
+        function updateDisplay() {
+            display.textContent = formatTime(remainingSeconds);
+            const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function startTimer() {
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            totalSeconds = remainingSeconds = hours * 3600 + minutes * 60;
+
+            if (totalSeconds <= 0) return;
+
+            setupView.style.display = 'none';
+            countdownView.style.display = 'block';
+            updateDisplay();
+
+            timer = setInterval(() => {
+            if (!isPaused && remainingSeconds > 0) {
+                remainingSeconds--;
+                updateDisplay();
+                if (remainingSeconds === 0) {
+                clearInterval(timer);
+                document.getElementById('popupOverlay').style.display = 'flex';
+                }
+            }
+            }, 1000);
+        }
+
+        document.getElementById('closePopupBtn').addEventListener('click', () => {
+            document.getElementById('popupOverlay').style.display = 'none';
+            restartTimer();
+        });
+
+
+        function pauseTimer() {
+            isPaused = !isPaused;
+            const pauseIcon = document.getElementById('pauseIcon');
+
+            if (isPaused) {
+                pauseIcon.classList.remove('bi-pause-fill');
+                pauseIcon.classList.add('bi-play-fill');
+            } else {
+                pauseIcon.classList.remove('bi-play-fill');
+                pauseIcon.classList.add('bi-pause-fill');
+            }
+        }
+
+
+        function restartTimer() {
+            clearInterval(timer);
+            remainingSeconds = 0;
+            progressBar.style.width = '0%';
+            isPaused = false;
+
+            // Reset pause icon to default (pause)
+            const pauseIcon = document.getElementById('pauseIcon');
+            pauseIcon.classList.remove('bi-play-fill');
+            pauseIcon.classList.add('bi-pause-fill');
+
+            // Show setup, hide countdown
+            setupView.style.display = 'block';
+            countdownView.style.display = 'none';
+        }
+
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        restartBtn.addEventListener('click', restartTimer);
+        </script>
