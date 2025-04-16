@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Datura - Settings</title>
   <style>
-    /* Global Styles */
     body {
       font-family: 'Arial', sans-serif;
       background-color: #d0eaff;
@@ -24,7 +23,6 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Header Section */
     .header {
       text-align: center;
       margin-bottom: 2rem;
@@ -37,10 +35,9 @@
     }
 
     .header h1 span {
-      color: #2ecc71; /* Highlighting Datura with an accent color */
+      color: #2ecc71;
     }
 
-    /* Button Styles */
     button {
       width: 100%;
       padding: 12px;
@@ -49,22 +46,21 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      background-color: #7f8c8d; /* Base gray color */
+      background-color: #7f8c8d;
       color: white;
       transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: #95a5a6; /* Slightly lighter gray for hover effect */
+      background-color: #95a5a6;
     }
 
-    /* Optional Specific Button Classes for More Control */
     .delete-profile-btn {
-      background-color: #7f8c8d; /* Red for delete button */
+      background-color: #7f8c8d;
     }
 
     .delete-profile-btn:hover {
-      background-color:  #95a5a6; /* Darker red on hover */
+      background-color:  #95a5a6;
     }
   </style>
 </head>
@@ -76,42 +72,62 @@
     </div>
 
     <div class="setting-group">
+      <!-- These buttons are connected to JavaScript functions -->
       <button class="logout-btn" onclick="handleLogout()">Logout</button>
-      <button class="change-password-btn" onclick="handleChangePassword()">Change Password</button>
-      <button class="delete-profile-btn" onclick="handleDeleteProfile()">Delete Profile</button>
-      
-      <!-- More Settings Buttons -->
-      <button class="basic-setting-btn" onclick="handleNotificationSettings()">Notification Settings</button>
-      <button class="basic-setting-btn" onclick="handlePrivacySettings()">Privacy Settings</button>
+      <button class="change-profile-btn " onclick="window.location.href='/changepassword';">Change Password</button>
+      <button class="delete-profile-btn" onclick="confirmDelete()">Delete Profile</button>
+      <button class="change-profile-btn " onclick="window.location.href='/aboutus';">About us</button>
     </div>
   </div>
 
+  <!-- Ensure that the script is included -->
   <script>
-    function handleLogout() {
-      // Replace with real logout logic
-      alert('Logging out...');
-    }
+    // Handle the Logout functionality
+    async function handleLogout() {
+      try {
+        const res = await fetch('/logout', {
+          method: 'POST',
+          credentials: 'include',  // To send the session cookie
+          headers: { 'Content-Type': 'application/json' }
+        });
 
-    function handleChangePassword() {
-      // Replace with real password change logic
-      alert('Redirecting to change password...');
-    }
-
-    function handleDeleteProfile() {
-      // Confirm and then delete
-      if (confirm('Are you sure you want to delete your profile?')) {
-        alert('Profile deleted');
+        const data = await res.json();
+        alert(data.message);  // Alert the user of the result
+        if (data.message === 'Logged out successfully') {
+          window.location.href = '/login'; // Redirect to login page after successful logout
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('There was an issue with logout.');
       }
     }
 
-    function handleNotificationSettings() {
-      alert('Opening notification settings...');
+  
+    // Handle Delete Profile (Example - This could be extended with form data)
+    function confirmDelete() {
+    const isConfirmed = confirm("Are you sure you want to delete your profile? This action cannot be undone.");
+    if (isConfirmed) {
+      deleteProfile();
     }
+  }
 
-    function handlePrivacySettings() {
-      alert('Opening privacy settings...');
+    async function deleteProfile() {
+      try {
+        const response = await fetch('/delete-profile', {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          alert('Profile deleted. Redirecting...');
+          window.location.href = '/login';
+        } else {
+          alert('Failed to delete profile.');
+        }
+      } catch (error) {
+        console.error('Error deleting profile:', error);
+        alert('Something went wrong.');
+      }
     }
   </script>
-
 </body>
 </html>

@@ -1,0 +1,224 @@
+<!-- Subject Edit Modal -->
+    <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content shadow">
+        <div class="modal-header">
+            <h5 class="modal-title" id="subjectModalLabel">Edit Subject</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="subjectForm">
+            <!-- Subject Name -->
+            <div class="mb-3">
+                <label for="subjectNameInput" class="form-label">Subject Name</label>
+                <input type="text" class="form-control" id="subjectNameInput" placeholder="Enter subject">
+                <div class="form-text text-danger d-none" id="subjectNameError">Please enter a subject.</div>
+            </div>
+
+            <!-- Subject Color -->
+            <div class="mb-3">
+                <label for="subjectColorInput" class="form-label">Subject Color</label>
+                <input type="color" class="form-control form-control-color" id="subjectColorInput" title="Choose your color">
+                <div class="form-text text-danger d-none" id="subjectColorError">Please choose a color.</div>
+            </div>
+            </form>
+        </div>
+
+        <div class="modal-footer justify-content-between">
+            <!-- Bottom Left Create New Button -->
+            <button type="button" class="btn btn-outline-secondary" id="createNewSubjectBtn">Create New</button>
+
+            <!-- Bottom Right Buttons -->
+            <div>
+            <button type="button" class="btn btn-danger" id="deleteSubjectBtn">Delete Subject</button>
+            <button type="button" class="btn btn-primary" id="saveSubjectBtn">Save</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let selectedSubjectValue = null;
+        let selectedSubjectColor = null;
+
+        const subjectDropdown = document.getElementById('subjectDropdown');
+        const subjectSpan = document.getElementById('selectedSubject');
+        const addSubjectBtn = document.getElementById('addSubjectBtn');
+        const subjectModal = new bootstrap.Modal(document.getElementById('subjectModal'));
+
+        const nameInput = document.getElementById('subjectNameInput');
+        const colorInput = document.getElementById('subjectColorInput');
+        const nameError = document.getElementById('subjectNameError');
+        const colorError = document.getElementById('subjectColorError');
+
+        // Handle dropdown subject selection
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', event => {
+                selectedSubjectValue = item.getAttribute('data-value');
+                selectedSubjectColor = item.getAttribute('data-color');
+
+                subjectSpan.innerHTML = `
+                    <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
+                    ${selectedSubjectValue}
+                `;
+                subjectSpan.classList.remove('placeholder-text');
+            });
+        });
+
+        // Open modal with pre-filled values
+        addSubjectBtn.addEventListener('click', () => {
+            nameInput.value = selectedSubjectValue || '';
+            colorInput.value = selectedSubjectColor || '#ffffff'; // fallback color
+            hideErrors();
+
+            const deleteBtn = document.getElementById('deleteSubjectBtn');
+            deleteBtn.textContent = selectedSubjectValue ? 'Delete Subject' : 'Cancel';
+
+            subjectModal.show();
+        });
+
+
+        // Create new resets modal
+        document.getElementById('createNewSubjectBtn').addEventListener('click', () => {
+            selectedSubjectValue = null;
+            selectedSubjectColor = null;
+            nameInput.value = '';
+            colorInput.value = '#ffffff';
+            hideErrors();
+        });
+
+        // Save button logic
+        document.getElementById('saveSubjectBtn').addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+
+            let hasError = false;
+            if (!name) {
+                nameError.classList.remove('d-none');
+                hasError = true;
+            } else {
+                nameError.classList.add('d-none');
+            }
+
+            if (!color || color.toLowerCase() === '#ffffff') {
+                colorError.classList.remove('d-none');
+                hasError = true;
+            } else {
+                colorError.classList.add('d-none');
+            }
+
+            if (hasError) return;
+
+            if (selectedSubjectValue) {
+            // Update the dropdown toggle text
+            subjectSpan.innerHTML = `
+                <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
+                ${name}
+            `;
+            subjectSpan.classList.remove('placeholder-text');
+
+            // Find and update the existing item in the dropdown
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => {
+                if (item.getAttribute('data-value') === selectedSubjectValue) {
+                    // Update text and color
+                    item.setAttribute('data-value', name);
+                    item.setAttribute('data-color', color);
+                    item.innerHTML = `
+                        <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
+                        ${name}
+                    `;
+
+                    // Update the click listener for this item
+                    item.addEventListener('click', function () {
+                        selectedSubjectValue = this.getAttribute('data-value');
+                        selectedSubjectColor = this.getAttribute('data-color');
+
+                        subjectSpan.innerHTML = `
+                            <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
+                            ${selectedSubjectValue}
+                        `;
+                        subjectSpan.classList.remove('placeholder-text');
+                    });
+                        }
+                    });
+
+                    // Update the internal values to the new ones
+                    selectedSubjectValue = name;
+                    selectedSubjectColor = color;
+                }
+
+                else {
+                    // Add new subject to dropdown
+                    const newItem = document.createElement('li');
+                    newItem.innerHTML = `
+                        <a class="dropdown-item d-flex align-items-center" href="#" data-value="${name}" data-color="${color}">
+                            <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
+                            ${name}
+                        </a>
+                    `;
+                    newItem.querySelector('a').addEventListener('click', function () {
+                        selectedSubjectValue = this.getAttribute('data-value');
+                        selectedSubjectColor = this.getAttribute('data-color');
+
+                        subjectSpan.innerHTML = `
+                            <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
+                            ${selectedSubjectValue}
+                        `;
+                        subjectSpan.classList.remove('placeholder-text');
+                    });
+
+                    document.querySelector('.custom-dropdown').appendChild(newItem);
+
+                    // Select the new one
+                    selectedSubjectValue = name;
+                    selectedSubjectColor = color;
+                    subjectSpan.innerHTML = `
+                        <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
+                        ${name}
+                    `;
+                    subjectSpan.classList.remove('placeholder-text');
+                }
+
+        subjectModal.hide();
+    });
+
+    // Delete Subject logic
+    document.getElementById('deleteSubjectBtn').addEventListener('click', () => {
+        if (selectedSubjectValue) {
+            // Editing an existing subject: remove it from the dropdown
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => {
+                if (item.getAttribute('data-value') === selectedSubjectValue) {
+                    item.parentElement.remove(); // remove the <li>
+                }
+            });
+
+            // Reset the dropdown display
+            subjectSpan.innerHTML = 'Select Subject';
+            subjectSpan.classList.add('placeholder-text');
+
+            // Clear selection
+            selectedSubjectValue = null;
+            selectedSubjectColor = null;
+        }
+
+        // Always clear the form
+        nameInput.value = '';
+        colorInput.value = '#ffffff';
+        hideErrors();
+
+        // Close the modal
+        subjectModal.hide();
+    });
+
+
+    function hideErrors() {
+        nameError.classList.add('d-none');
+        colorError.classList.add('d-none');
+    }    
+     </script>
