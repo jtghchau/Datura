@@ -82,6 +82,7 @@
 
             timer = setInterval(() => {
             if (!isPaused && remainingSeconds > 0) {
+                coins++;
                 remainingSeconds--;
                 updateDisplay();
                 if (remainingSeconds === 0) {
