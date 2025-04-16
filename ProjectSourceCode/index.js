@@ -65,6 +65,13 @@ app.get('/settings', (req, res) => {
     res.render('pages/settings');
 });
 
+app.get('/aboutus', (req, res) => {
+  res.render('pages/aboutus'); // assuming your HBS file is in views/pages/profile.hbs
+});
+
+app.get('/changepassword', (req, res) => {
+  res.render('pages/changepassword');
+});
 
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
@@ -212,6 +219,90 @@ app.post('/logout', (req, res) => {
     res.json({ message: 'Logged out successfully' });
   });
 });  
+
+// *****************************************************
+//               Delete profile Route
+// *****************************************************
+
+app.delete('/delete-profile', async (req, res) => {
+  const user = req.session.user;
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const username = user.username;
+
+  try {
+    // Begin a transaction to ensure atomic deletion
+    await db.tx(async t => {
+      // Delete user references in other tables
+      await t.none('DELETE FROM leaderboard_members WHERE username = $1', [username]);
+      await t.none('DELETE FROM leaderboards WHERE created_by = $1', [username]);
+      await t.none('DELETE FROM friends WHERE username = $1 OR friend_username = $1', [username]);
+      await t.none('DELETE FROM calendar_events WHERE username = $1', [username]);
+      await t.none('DELETE FROM study_notes WHERE username = $1', [username]);
+      await t.none('DELETE FROM user_themes WHERE username = $1', [username]);
+      await t.none('DELETE FROM user_clothing WHERE username = $1', [username]);
+      await t.none('DELETE FROM sessions WHERE username = $1', [username]);
+      await t.none('DELETE FROM goals WHERE username = $1', [username]);
+
+      // Finally delete the user
+      await t.none('DELETE FROM users WHERE username = $1', [username]);
+    });
+
+    // Destroy the session
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Session destroy error:', err);
+        return res.status(500).json({ message: 'Error logging out after deletion' });
+      }
+      res.clearCookie('connect.sid');
+      res.json({ message: 'Profile and all related data deleted successfully' });
+    });
+  } catch (err) {
+    console.error('Error deleting profile:', err);
+    res.status(500).json({ message: 'Failed to delete profile and related data' });
+  }
+});
+
+// *****************************************************
+//               Change password
+// *****************************************************
+
+app.post('/change-password', async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.render('pages/changepassword', { error: 'Please fill out all fields.' });
+  }
+
+  if (newPassword !== confirmPassword) {
+      return res.render('pages/changepassword', { error: 'New passwords do not match.' });
+  }
+
+  try {
+      const user = req.session.user;
+      const userData = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [user.username]);
+
+      if (!userData) {
+          return res.render('pages/changepassword', { error: 'User not found.' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, userData.password);
+
+      if (!isMatch) {
+          return res.render('pages/changepassword', { error: 'Incorrect current password.' });
+      }
+
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      await db.none('UPDATE users SET password = $1 WHERE username = $2', [hashedNewPassword, user.username]);
+
+      res.redirect('/settings'); // After successful password change, redirect to settings
+  } catch (error) {
+      console.error('Error changing password:', error);
+      res.render('pages/changepassword', { error: 'Something went wrong. Please try again.' });
+  }
+});
 
 // *****************************************************
 //               Save Study Session API
