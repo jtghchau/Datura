@@ -17,7 +17,7 @@ CREATE TABLE goals (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
--- Study 
+-- Study (might have to delete this table)
 CREATE TABLE sessions (
     session_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
@@ -44,39 +44,14 @@ CREATE TABLE user_clothing (
     FOREIGN KEY (item_id) REFERENCES clothing_items(item_id)
 );
 
-CREATE TABLE equipped_clothing (
-    username VARCHAR(50) PRIMARY KEY,
-    head_item_id INTEGER,
-    body_item_id INTEGER,
-    pants_item_id INTEGER,
-    FOREIGN KEY (username) REFERENCES users(username),
-    FOREIGN KEY (head_item_id) REFERENCES clothing_items(item_id),
-    FOREIGN KEY (body_item_id) REFERENCES clothing_items(item_id),
-    FOREIGN KEY (pants_item_id) REFERENCES clothing_items(item_id)
-);
-
--- Themes
-CREATE TABLE themes (
-    theme_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    name TEXT NOT NULL,
-    cost INTEGER NOT NULL
-);
-
-CREATE TABLE user_themes (
-    username VARCHAR(50),
-    theme_id INTEGER,
-    PRIMARY KEY (username, theme_id),
-    FOREIGN KEY (username) REFERENCES users(username),
-    FOREIGN KEY (theme_id) REFERENCES themes(theme_id)
-);
-
-
 -- Notes
 CREATE TABLE study_notes (
     note_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(50),
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    pos_left INTEGER DEFAULT 0,  -- Horizontal position of the note
+    pos_top INTEGER DEFAULT 0,   -- Vertical position of the note
     FOREIGN KEY (username) REFERENCES users(username)
 );
 

@@ -18,7 +18,7 @@
 
             <!-- Subject Color -->
             <div class="mb-3">
-                <label for="subjectColorInput" class="form-label">Subject Color</label>
+                <label for="subjectColorInput" class="form-label">Category Color</label>
                 <input type="color" class="form-control form-control-color" id="subjectColorInput" title="Choose your color">
                 <div class="form-text text-danger d-none" id="subjectColorError">Please choose a color.</div>
             </div>
@@ -27,11 +27,13 @@
 
         <div class="modal-footer justify-content-between">
             <!-- Bottom Left Create New Button -->
-            <button type="button" class="btn btn-outline-secondary" id="createNewSubjectBtn">Create New</button>
+            <div id="createNewWrapper">
+                <button type="button" class="btn btn-success" id="createNewSubjectBtn">Create New</button>
+            </div>
 
             <!-- Bottom Right Buttons -->
             <div>
-            <button type="button" class="btn btn-danger" id="deleteSubjectBtn">Delete Subject</button>
+            <button type="button" class="btn btn-outline-danger" id="deleteSubjectBtn">Delete Category</button>
             <button type="button" class="btn btn-primary" id="saveSubjectBtn">Save</button>
             </div>
         </div>
@@ -75,11 +77,23 @@
             colorInput.value = selectedSubjectColor || '#ffffff'; // fallback color
             hideErrors();
 
+            const createWrapper = document.getElementById('createNewWrapper');
+            const modalTitle = document.getElementById('subjectModalLabel');
             const deleteBtn = document.getElementById('deleteSubjectBtn');
-            deleteBtn.textContent = selectedSubjectValue ? 'Delete Subject' : 'Cancel';
+
+            if (selectedSubjectValue) {
+                createWrapper.classList.remove('invisible');
+                modalTitle.textContent = 'Edit Catgeory';
+                deleteBtn.textContent = 'Delete Category';
+            } else {
+                createWrapper.classList.add('invisible');
+                modalTitle.textContent = 'Create Category';
+                deleteBtn.textContent = 'Cancel';
+            }
 
             subjectModal.show();
         });
+
 
 
         // Create new resets modal
@@ -89,6 +103,21 @@
             nameInput.value = '';
             colorInput.value = '#ffffff';
             hideErrors();
+            document.getElementById('createNewWrapper').classList.add('invisible');
+
+            const createWrapper = document.getElementById('createNewWrapper');
+            const modalTitle = document.getElementById('subjectModalLabel');
+            const deleteBtn = document.getElementById('deleteSubjectBtn');
+
+            if (selectedSubjectValue) {
+                createWrapper.classList.remove('invisible');
+                modalTitle.textContent = 'Edit Catgeory';
+                deleteBtn.textContent = 'Delete Category';
+            } else {
+                createWrapper.classList.add('invisible');
+                modalTitle.textContent = 'Create Category';
+                deleteBtn.textContent = 'Cancel';
+            }
         });
 
         // Save button logic
@@ -199,7 +228,7 @@
             });
 
             // Reset the dropdown display
-            subjectSpan.innerHTML = 'Select Subject';
+            subjectSpan.innerHTML = 'Select Category';
             subjectSpan.classList.add('placeholder-text');
 
             // Clear selection
