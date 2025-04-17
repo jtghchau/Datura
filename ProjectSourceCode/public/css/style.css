@@ -185,3 +185,41 @@ body.hide-nav nav {
     opacity: 1;
   }
 }
+
+#subjectWarning {
+  color: rgb(255, 0, 0); /* Red text */
+  font-weight: bold; /* Bold text */
+  text-align: center; /* Center align the message */
+  margin: 15px auto; /* Space below the warning */
+  font-size: 1.1rem; /* Slightly larger text */
+  padding: 5px 0; /* Add vertical padding */
+  border: none; /* No background or borders */
+  background: none; /* No background fill */
+  max-width: 500px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+
+
+/* delete buttons tyling for subject modal */
+#deleteSubjectBtn {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#deleteSubjectBtn:hover {
+  background-color: #dc3545; /* Bootstrap danger red */
+  color: white;
+}
+
+
+.btn-success {
+  background-color: #25a029; /* Light green */
+  color: white;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-success:hover {
+  background-color: #118015; /* Darker green on hover */
+  color: white;
+}
