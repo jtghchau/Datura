@@ -77,6 +77,8 @@ CREATE TABLE study_notes (
     username VARCHAR(50),
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    pos_left INTEGER DEFAULT 0,  -- Horizontal position of the note
+    pos_top INTEGER DEFAULT 0,   -- Vertical position of the note
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
