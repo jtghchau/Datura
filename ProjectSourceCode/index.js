@@ -305,6 +305,96 @@ app.post('/change-password', async (req, res) => {
 });
 
 // *****************************************************
+//               Notes
+// *****************************************************
+
+app.get('/api/notes', async (req, res) => {
+  console.log('Current session user:', req.session.user);
+  const user = req.session.user;
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const notes = await db.any(
+      'SELECT * FROM study_notes WHERE username = $1',
+      [user.username]
+    );
+    res.json(notes);
+  } catch (err) {
+    console.error('Error fetching notes:', err);
+    res.status(500).json({ error: 'Could not fetch notes' });
+  }
+});
+
+
+
+
+
+app.post('/api/notes', async (req, res) => {
+  const user = req.session.user;
+  const { content, pos_left = 100, pos_top = 100 } = req.body;
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const newNote = await db.one(
+      `INSERT INTO study_notes (username, content, pos_left, pos_top)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [user.username, content, pos_left, pos_top]
+    );
+    res.status(201).json(newNote);
+  } catch (err) {
+    console.error('Error creating note:', err);
+    res.status(500).json({ error: 'Could not save note' });
+  }
+});
+
+//               Update Study Note API
+
+
+app.put('/api/notes/:id', async (req, res) => {
+  const user = req.session.user;
+  const { content, pos_left, pos_top } = req.body;
+  const noteId = req.params.id;
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    await db.none(
+      `UPDATE study_notes
+       SET content = $1, pos_left = $2, pos_top = $3
+       WHERE note_id = $4 AND username = $5`,
+      [content, pos_left, pos_top, noteId, user.username]
+    );
+    res.status(200).json({ message: 'Note updated' });
+  } catch (err) {
+    console.error('Error updating note:', err);
+    res.status(500).json({ error: 'Could not update note' });
+  }
+});
+
+
+//               Delete Study Note API
+
+
+app.delete('/api/notes/:id', async (req, res) => {
+  const user = req.session.user;
+  const noteId = req.params.id;
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    await db.none(
+      `DELETE FROM study_notes WHERE note_id = $1 AND username = $2`,
+      [noteId, user.username]
+    );
+    res.status(200).json({ message: 'Note deleted' });
+  } catch (err) {
+    console.error('Error deleting note:', err);
+    res.status(500).json({ error: 'Could not delete note' });
+  }
+});
+
+// *****************************************************
 //               Save Study Session API
 // *****************************************************
 
@@ -332,6 +422,7 @@ app.post('/api/sessions', async (req, res) => {
     res.status(500).json({ error: 'Database error while saving session.' });
   }
 });
+
 
 // *****************************************************
 //               Get Study Sessions API
