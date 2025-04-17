@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>home</title>
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background-image: url('/images/background1.png');
@@ -181,7 +181,7 @@
 
     <!-- Icons -->
     <div class="home-icons d-flex flex-column align-items-center p-3">
-        <a class="icon-link" href="/notes">
+        <a class="icon-link" href="#" id="showStickyNoteBtn">
             <i class="bi bi-journal-bookmark-fill fs-5" style="color: rgb(91, 91, 91);"></i>
         </a>
         <a class="icon-link" href="/store">
@@ -200,6 +200,10 @@
 
     <!-- Subject Edit Modal -->
     {{> subjectModal}}
+
+    <div id="sticky-note-container" style="display:none;">
+    {{> note}}
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -221,7 +225,68 @@
         });
     </script>
 
+    <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const stickyNoteContainer = document.getElementById('sticky-note-container');
+    const showStickyNoteBtn = document.getElementById('showStickyNoteBtn');
+
+    // Make sure container starts hidden
+    stickyNoteContainer.style.display = 'none';
+
+    // Toggle sticky note visibility when button is clicked
+    showStickyNoteBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        // Toggle visibility
+        if (stickyNoteContainer.style.display === 'none') {
+            stickyNoteContainer.style.display = 'block';
+
+            // Make draggable
+            const note = stickyNoteContainer.querySelector('.note-postit');
+            if (note) makeDraggable(note);
+        } else {
+            stickyNoteContainer.style.display = 'none';
+        }
+    });
+
+    // Close button logic
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('close-btn')) {
+            stickyNoteContainer.style.display = 'none'; // hide the whole container
+        }
+    });
+
+    function makeDraggable(noteElement) {
+        let offsetX = 0, offsetY = 0, isDragging = false;
+
+        noteElement.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            offsetX = e.clientX - noteElement.offsetLeft;
+            offsetY = e.clientY - noteElement.offsetTop;
+            noteElement.style.position = 'absolute';
+            noteElement.style.zIndex = 1000;
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            noteElement.style.left = (e.clientX - offsetX) + 'px';
+            noteElement.style.top = (e.clientY - offsetY) + 'px';
+        });
+
+        document.addEventListener('mouseup', function () {
+            isDragging = false;
+        });
+    }
+});
+
+
+
+    </script>
+
 </body>
+
+
 </html>
 
 
