@@ -32,3 +32,15 @@ We also talked about next week's lab and the one story that needs to be done by 
 We assigned each story in our personal team meeting as well. 
 
 The TA meeting was 15 minutes long. Our personal team meeting lasted 15 minutes.
+
+April 11th, 2025
+This week we completed the positive and negative test cases for registering and logging in. The login and register pages were also fully implemented. The home page was set up and the routes for the buttons were also set up. We brefiely started on the settings and friends pages.
+
+During the meeting we did a demo of what we had set up so far, including registering and logging in. 
+
+Things we should focus on moving forward:
+We should have most things implemented by Thursday's lab
+Implement the dashboard and calendar
+Make sure the UI is solid and cohesive
+We should add some animations, like on the character
+
