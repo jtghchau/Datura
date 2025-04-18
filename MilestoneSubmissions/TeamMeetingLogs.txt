@@ -38,9 +38,13 @@ This week we completed the positive and negative test cases for registering and 
 
 During the meeting we did a demo of what we had set up so far, including registering and logging in. 
 
-Things we should focus on moving forward:
+Things we decided to focus on moving forward:
 We should have most things implemented by Thursday's lab
 Implement the dashboard and calendar
 Make sure the UI is solid and cohesive
 We should add some animations, like on the character
+
+During our personal team meeting, we discussed our goals and delegated the work for the remaining features (store, timer, friends, dashboard, etc.)
+
+The TA meeting was 15 minutes long. Our personal team meeting lasted 15 minutes.
 
