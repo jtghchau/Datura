@@ -48,3 +48,18 @@ During our personal team meeting, we discussed our goals and delegated the work 
 
 The TA meeting was 15 minutes long. Our personal team meeting lasted 15 minutes.
 
+April 18th
+
+5:30pm-5:45pm (TA Meeting)
+5:45pm-6:00pm (Group Meeting)
+
+    - Showcased the app. 
+    - Need to finalize some items and fix bugs. 
+    - Make sure to get points across clearly during our presentation. 
+    - Add to the project board and finish/add epics. 
+    - Need presentation and full web application uploaded before thursday. 
+    - Report is due a little later.
+
+We need to work on debuging the web application, finish up stores and project board aling with the presentation slides and report.
+We can hold off on the report for now and focus on the more important stuff at hand. Meet next week at 5 to finalized some things.
+
