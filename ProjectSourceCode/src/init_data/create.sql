@@ -76,18 +76,30 @@ CREATE TABLE friends (
     FOREIGN KEY (friend_username) REFERENCES users(username)
 );
 
+
 -- Leaderboards
 CREATE TABLE leaderboards (
     leaderboard_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name TEXT NOT NULL,
     created_by VARCHAR(50),
+    status TEXT CHECK(status IN ('pending', 'accepted')) DEFAULT 'pending',
     FOREIGN KEY (created_by) REFERENCES users(username)
 );
+
 
 CREATE TABLE leaderboard_members (
     leaderboard_id INTEGER,
     username VARCHAR(50),
+    time_studied   INTEGER DEFAULT 0,
     PRIMARY KEY (leaderboard_id, username),
     FOREIGN KEY (leaderboard_id) REFERENCES leaderboards(leaderboard_id),
     FOREIGN KEY (username) REFERENCES users(username)
+);
+
+CREATE TABLE leaderboard_invites (
+  invite_id      SERIAL PRIMARY KEY,
+  leaderboard_id INTEGER NOT NULL REFERENCES leaderboards(leaderboard_id),
+  from_user      VARCHAR(50) NOT NULL REFERENCES users(username),
+  to_user        VARCHAR(50) NOT NULL REFERENCES users(username),
+  status         TEXT CHECK (status IN ('pending','accepted','declined')) DEFAULT 'pending'
 );
