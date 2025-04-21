@@ -527,14 +527,18 @@ app.put('/api/categories/:id', async (req, res) => {
 //for deleting categories
 app.delete('/api/categories/:id', (req, res) => {
   const categoryId = req.params.id;
-  console.log(`Fake DELETE route hit for ID: ${categoryId}`);
-  res.json({ success: true });
+  console.log(`Deleting category with ID: ${categoryId}`);
+
+  // Use pg-promise to execute the delete query
+  db.none('DELETE FROM categories WHERE category_id = $1', [categoryId])
+    .then(() => {
+      res.json({ success: true });
+    })
+    .catch(err => {
+      console.error('Error deleting category:', err);
+      res.status(500).json({ error: 'Failed to delete category' });
+    });
 });
-
-
-
-
-
 
 
 
