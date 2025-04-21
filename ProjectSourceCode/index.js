@@ -399,10 +399,10 @@ app.delete('/api/notes/:id', async (req, res) => {
 // *****************************************************
 
 app.post('/api/sessions', async (req, res) => {
-    const user = req.session.user;
-    if (!user) {
-        return res.status(401).json({ error: 'Unauthorized. Please log in.' });
-    }
+  const user = req.session.user;
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized. Please log in.' });
+  }
 
   const { title, start_time, end_time, total_minutes } = req.body;
 
@@ -430,11 +430,11 @@ app.post('/api/sessions', async (req, res) => {
       [user.username, category.category_id, start_time, end_time, total_minutes]
     );
 
-        res.status(201).json({ message: 'Session saved successfully.' });
-    } catch (err) {
-        console.error('Error saving session:', err);
-        res.status(500).json({ error: 'Database error while saving session.' });
-    }
+    res.status(201).json({ message: 'Session saved successfully.' });
+  } catch (err) {
+    console.error('Error saving session:', err);
+    res.status(500).json({ error: 'Database error while saving session.' });
+  }
 });
 
 
@@ -444,10 +444,10 @@ app.post('/api/sessions', async (req, res) => {
 //               Get Study Sessions API
 // *****************************************************
 app.get('/api/sessions', async (req, res) => {
-    const user = req.session.user;
-    if (!user) {
-        return res.status(401).json({ error: 'Unauthorized. Please log in.' });
-    }
+  const user = req.session.user;
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized. Please log in.' });
+  }
 
   try {
     const sessions = await db.any(
@@ -648,7 +648,5 @@ app.get('/home', async (req, res) => {
     res.render('home', { categories: [] });
   }
 });
-
-
 
 

@@ -8,7 +8,6 @@ INSERT INTO categories (category_name, category_color, username) VALUES
 ('English', '#FF0000', 'testuser');
 
 -- Insert Study Sessions 
--- Insert a test session linked to the 'testuser' and 'Math' category
 INSERT INTO sessions (category_id, username, start_time, end_time, total_minutes) 
 VALUES 
 (1, 'testuser', '2025-04-21 10:00:00', '2025-04-21 12:00:00', 120),

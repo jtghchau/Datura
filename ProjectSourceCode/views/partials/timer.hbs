@@ -194,7 +194,6 @@
         countdownView.style.display = 'none';
     }
 
-    // Save the session and update the calendar
     // Function to save the session to the database
     function saveSessionToDatabase() {
         const subjectName = localStorage.getItem('selectedSubjectValue');
@@ -241,7 +240,6 @@
         fetch('/api/sessions')
         .then(response => response.json())
         .then(sessions => {
-            // Assuming you have a function to update your calendar with the sessions data
             updateCalendarView(sessions);
         })
         .catch(err => {
@@ -251,11 +249,6 @@
 
     // Function to update the calendar with new session data
     function updateCalendarView(sessions) {
-        // This function will depend on how you are currently rendering your calendar
-        // For example, if you're using a library or a custom calendar view,
-        // you'll need to update the calendar view with the new session data.
-
-        // Example of updating a simple calendar view with session data:
         sessions.forEach(session => {
             const event = {
                 title: session.title,
@@ -263,10 +256,6 @@
                 end: session.end,
                 color: session.color,
             };
-
-            // Here you would add the event to your calendar view
-            // This could involve updating the calendar UI directly or
-            // triggering a render function if you're using a calendar library.
         });
     }
 
