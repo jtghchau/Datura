@@ -9,6 +9,15 @@ const pgp = require('pg-promise')(); // To connect to the Postgres DB from the n
 const app = express();
 const PORT = 3000;
 
+// initialize session variables
+app.use(
+  session({
+      secret: process.env.SESSION_SECRET,
+      saveUninitialized: false,
+      resave: false,
+  })
+);
+
 app.engine('hbs', exphbs.engine({ extname: '.hbs' }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
@@ -21,6 +30,13 @@ app.use(express.json());
 //                    API Routes
 // *****************************************************
 
+function requireLogin(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+}
+
 app.get('/', (req, res) => {
     res.render('pages/register');
 });
@@ -29,23 +45,19 @@ app.get('/register', (req, res) => {
     res.render('pages/register');
 });
 
-app.get('/notes', (req, res) => {
+app.get('/notes', requireLogin, (req, res) => {
     res.render('pages/notes');
 });
 
-app.get('/store', (req, res) => {
+app.get('/store', requireLogin, (req, res) => {
     res.render('pages/store');
 });
 
-app.get('/notifications', (req, res) => {
-    res.render('pages/notifications');
-});
-
-app.get('/calendar', (req, res) => {
+app.get('/calendar', requireLogin, (req, res) => {
     res.render('pages/calendar');
 });
 
-app.get('/friends', (req, res) => {
+app.get('/friends', requireLogin, (req, res) => {
     res.render('pages/friends');
 });
 
@@ -57,19 +69,19 @@ app.get('/welcome', (req, res) => {
     res.json({ status: 'success', message: 'Welcome!' });
 });
 
-app.get('/home', (req, res) => {
+app.get('/home', requireLogin, (req, res) => {
     res.render('pages/home');
 });
 
-app.get('/settings', (req, res) => {
+app.get('/settings', requireLogin, (req, res) => {
     res.render('pages/settings');
 });
 
-app.get('/aboutus', (req, res) => {
+app.get('/aboutus', requireLogin, (req, res) => {
     res.render('pages/aboutus'); // assuming your HBS file is in views/pages/profile.hbs
 });
 
-app.get('/changepassword', (req, res) => {
+app.get('/changepassword', requireLogin, (req, res) => {
     res.render('pages/changepassword');
 });
 
@@ -116,14 +128,6 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
-// initialize session variables
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET,
-        saveUninitialized: false,
-        resave: false,
-    })
-);
 
 app.use(
     bodyParser.urlencoded({
