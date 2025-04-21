@@ -52,6 +52,27 @@
         const addSubjectBtn = document.getElementById('addSubjectBtn');
         const subjectModal = new bootstrap.Modal(document.getElementById('subjectModal'));
 
+        // Restore from localStorage on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const storedValue = localStorage.getItem('selectedSubjectValue');
+            const storedColor = localStorage.getItem('selectedSubjectColor');
+            const storedId = localStorage.getItem('selectedSubjectId');
+
+            if (storedValue && storedColor && storedId) {
+                selectedSubjectValue = storedValue;
+                selectedSubjectColor = storedColor;
+                selectedSubjectId = storedId; // make this global or trackable
+
+                subjectSpan.innerHTML = `
+                    <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
+                    ${selectedSubjectValue}
+                `;
+                subjectSpan.classList.remove('placeholder-text');
+            }
+        });
+
+
+
         const nameInput = document.getElementById('subjectNameInput');
         const colorInput = document.getElementById('subjectColorInput');
         const nameError = document.getElementById('subjectNameError');
@@ -62,6 +83,11 @@
             item.addEventListener('click', event => {
                 selectedSubjectValue = item.getAttribute('data-value');
                 selectedSubjectColor = item.getAttribute('data-color');
+                const selectedSubjectId = item.getAttribute('data-id');
+
+                localStorage.setItem('selectedSubjectValue', selectedSubjectValue);
+                localStorage.setItem('selectedSubjectColor', selectedSubjectColor);
+                localStorage.setItem('selectedSubjectId', selectedSubjectId); // ADD THIS
 
                 subjectSpan.innerHTML = `
                     <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
@@ -71,26 +97,14 @@
             });
         });
 
+
+
         // Open modal with pre-filled values
         addSubjectBtn.addEventListener('click', () => {
             nameInput.value = selectedSubjectValue || '';
             colorInput.value = selectedSubjectColor || '#ffffff'; // fallback color
             hideErrors();
-
-            const createWrapper = document.getElementById('createNewWrapper');
-            const modalTitle = document.getElementById('subjectModalLabel');
-            const deleteBtn = document.getElementById('deleteSubjectBtn');
-
-            if (selectedSubjectValue) {
-                createWrapper.classList.remove('invisible');
-                modalTitle.textContent = 'Edit Catgeory';
-                deleteBtn.textContent = 'Delete Category';
-            } else {
-                createWrapper.classList.add('invisible');
-                modalTitle.textContent = 'Create Category';
-                deleteBtn.textContent = 'Cancel';
-            }
-
+            updateModalUI();
             subjectModal.show();
         });
 
@@ -103,21 +117,10 @@
             nameInput.value = '';
             colorInput.value = '#ffffff';
             hideErrors();
-            document.getElementById('createNewWrapper').classList.add('invisible');
+            updateModalUI();
 
-            const createWrapper = document.getElementById('createNewWrapper');
-            const modalTitle = document.getElementById('subjectModalLabel');
-            const deleteBtn = document.getElementById('deleteSubjectBtn');
-
-            if (selectedSubjectValue) {
-                createWrapper.classList.remove('invisible');
-                modalTitle.textContent = 'Edit Catgeory';
-                deleteBtn.textContent = 'Delete Category';
-            } else {
-                createWrapper.classList.add('invisible');
-                modalTitle.textContent = 'Create Category';
-                deleteBtn.textContent = 'Cancel';
-            }
+            localStorage.removeItem('selectedSubjectValue');
+            localStorage.removeItem('selectedSubjectColor');
         });
 
         // Save button logic
@@ -143,56 +146,118 @@
             if (hasError) return;
 
             if (selectedSubjectValue) {
-            // Update the dropdown toggle text
-            subjectSpan.innerHTML = `
-                <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                ${name}
-            `;
-            subjectSpan.classList.remove('placeholder-text');
+                const dropdownItems = document.querySelectorAll('.dropdown-item');
+                let categoryIdToUpdate = null;
 
-            // Find and update the existing item in the dropdown
-            const dropdownItems = document.querySelectorAll('.dropdown-item');
-            dropdownItems.forEach(item => {
-                if (item.getAttribute('data-value') === selectedSubjectValue) {
-                    // Update text and color
-                    item.setAttribute('data-value', name);
-                    item.setAttribute('data-color', color);
-                    item.innerHTML = `
-                        <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                        ${name}
-                    `;
+                dropdownItems.forEach(item => {
+                    if (item.getAttribute('data-value') === selectedSubjectValue) {
+                    categoryIdToUpdate = item.getAttribute('data-id');
+                    }
+                });
 
-                    // Update the click listener for this item
-                    item.addEventListener('click', function () {
-                        selectedSubjectValue = this.getAttribute('data-value');
-                        selectedSubjectColor = this.getAttribute('data-color');
+                if (!categoryIdToUpdate) {
+                    console.error('Could not find category to update');
+                    return;
+                }
 
-                        subjectSpan.innerHTML = `
-                            <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
-                            ${selectedSubjectValue}
-                        `;
-                        subjectSpan.classList.remove('placeholder-text');
-                    });
+                fetch(`/api/categories/${categoryIdToUpdate}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        category_name: name,
+                        category_color: color
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Failed to update category:', data.error);
+                        return;
+                    }
+
+                    // Update the dropdown item
+                    dropdownItems.forEach(item => {
+                        if (item.getAttribute('data-id') === categoryIdToUpdate) {
+                            item.setAttribute('data-value', data.category_name);
+                            item.setAttribute('data-color', data.category_color);
+                            item.innerHTML = `
+                                <span class="subject-color-circle" style="background-color: ${data.category_color}; margin-right: 8px;"></span>
+                                ${data.category_name}
+                            `;
+
+                            // Add click event listener to update the selected category
+                            item.addEventListener('click', function () {
+                                selectedSubjectValue = this.getAttribute('data-value');
+                                selectedSubjectColor = this.getAttribute('data-color');
+
+                                // Update localStorage with the updated category
+                                updateLocalStorageWithSelectedCategory(categoryIdToUpdate, data.category_name, data.category_color);
+
+                                subjectSpan.innerHTML = `
+                                    <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
+                                    ${selectedSubjectValue}
+                                `;
+                                subjectSpan.classList.remove('placeholder-text');
+                            });
                         }
                     });
 
-                    // Update the internal values to the new ones
-                    selectedSubjectValue = name;
-                    selectedSubjectColor = color;
+                    // Update the UI with the updated category name and color
+                    selectedSubjectValue = data.category_name;
+                    selectedSubjectColor = data.category_color;
+
+                    // Update localStorage with the updated category
+                    updateLocalStorageWithSelectedCategory(categoryIdToUpdate, data.category_name, data.category_color);
+
+                    subjectSpan.innerHTML = `
+                        <span class="subject-color-circle" style="background-color: ${data.category_color}; margin-right: 8px;"></span>
+                        ${data.category_name}
+                    `;
+                    subjectSpan.classList.remove('placeholder-text');
+
+                    subjectModal.hide();
+                })
+                .catch(err => {
+                    console.error('Error updating category:', err);
+                });
+
                 }
 
-                else {
-                    // Add new subject to dropdown
+
+            else {
+                fetch('/api/categories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        category_name: name,
+                        category_color: color
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Failed to create category:', data.error);
+                        return;
+                    }
+
                     const newItem = document.createElement('li');
                     newItem.innerHTML = `
-                        <a class="dropdown-item d-flex align-items-center" href="#" data-value="${name}" data-color="${color}">
-                            <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                            ${name}
+                        <a class="dropdown-item d-flex align-items-center" href="#" data-value="${data.category_name}" data-color="${data.category_color}" data-id="${data.category_id}">
+                            <span class="subject-color-circle" style="background-color: ${data.category_color}; margin-right: 8px;"></span>
+                            ${data.category_name}
                         </a>
                     `;
+
                     newItem.querySelector('a').addEventListener('click', function () {
                         selectedSubjectValue = this.getAttribute('data-value');
                         selectedSubjectColor = this.getAttribute('data-color');
+
+                        // Call updateLocalStorageWithSelectedCategory here after selecting a category
+                        updateLocalStorageWithSelectedCategory(data.category_id, data.category_name, data.category_color);
 
                         subjectSpan.innerHTML = `
                             <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
@@ -203,51 +268,128 @@
 
                     document.querySelector('.custom-dropdown').appendChild(newItem);
 
-                    // Select the new one
-                    selectedSubjectValue = name;
-                    selectedSubjectColor = color;
+                    // Select the new category and update localStorage
+                    selectedSubjectValue = data.category_name;
+                    selectedSubjectColor = data.category_color;
+
+                    // Call updateLocalStorageWithSelectedCategory here after creating a new category
+                    updateLocalStorageWithSelectedCategory(data.category_id, data.category_name, data.category_color);
+
                     subjectSpan.innerHTML = `
-                        <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                        ${name}
+                        <span class="subject-color-circle" style="background-color: ${data.category_color}; margin-right: 8px;"></span>
+                        ${data.category_name}
                     `;
                     subjectSpan.classList.remove('placeholder-text');
-                }
+
+                    subjectModal.hide();
+                })
+                .catch(err => {
+                    console.error('Error creating category:', err);
+                });
+
+            }
+
 
         subjectModal.hide();
     });
 
-    // Delete Subject logic
+    // Delete Category logic
     document.getElementById('deleteSubjectBtn').addEventListener('click', () => {
-        if (selectedSubjectValue) {
-            // Editing an existing subject: remove it from the dropdown
-            const dropdownItems = document.querySelectorAll('.dropdown-item');
+    if (selectedSubjectValue) {
+        // Find the category to delete
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        let categoryIdToDelete = null;
+
+        dropdownItems.forEach(item => {
+            if (item.getAttribute('data-value') === selectedSubjectValue) {
+                categoryIdToDelete = item.getAttribute('data-id');
+            }
+        });
+
+        if (!categoryIdToDelete) {
+            console.error('Could not find category to delete');
+            return;
+        }
+
+        fetch(`/api/categories/${categoryIdToDelete}`, {
+            method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Failed to delete category:', data.error);
+                return;
+            }
+
+            // Remove from dropdown
             dropdownItems.forEach(item => {
-                if (item.getAttribute('data-value') === selectedSubjectValue) {
-                    item.parentElement.remove(); // remove the <li>
+                if (item.getAttribute('data-id') === categoryIdToDelete) {
+                    item.parentElement.remove(); // remove <li>
                 }
             });
 
-            // Reset the dropdown display
-            subjectSpan.innerHTML = 'Select Category';
-            subjectSpan.classList.add('placeholder-text');
-
-            // Clear selection
+            // Reset the UI
             selectedSubjectValue = null;
             selectedSubjectColor = null;
-        }
+            subjectSpan.innerHTML = 'Select Category';
+            subjectSpan.classList.add('placeholder-text');
+            nameInput.value = '';
+            colorInput.value = '#ffffff';
+            hideErrors();
 
-        // Always clear the form
+            // Clear localStorage for selected subject
+            localStorage.removeItem('selectedSubjectValue');
+            localStorage.removeItem('selectedSubjectColor');
+
+            subjectModal.hide();
+        })
+        .catch(err => {
+            console.error('Error deleting category:', err);
+        });
+    } else {
+        // We're in create mode — just cancel
         nameInput.value = '';
         colorInput.value = '#ffffff';
         hideErrors();
-
-        // Close the modal
         subjectModal.hide();
-    });
+    }
+});
+
+
 
 
     function hideErrors() {
         nameError.classList.add('d-none');
         colorError.classList.add('d-none');
     }    
+
+//helper for when we open the modal
+function updateModalUI() {
+    const createWrapper = document.getElementById('createNewWrapper');
+    const modalTitle = document.getElementById('subjectModalLabel');
+    const deleteBtn = document.getElementById('deleteSubjectBtn');
+
+        console.log('selectedSubjectValue:', selectedSubjectValue); 
+
+
+    if (selectedSubjectValue) {
+        createWrapper.classList.remove('invisible');
+        modalTitle.textContent = 'Edit Category';
+        deleteBtn.textContent = 'Delete Category';
+    } else {
+        createWrapper.classList.add('invisible');
+        modalTitle.textContent = 'Create Category';
+        deleteBtn.textContent = 'Cancel';
+    }
+}
+
+// This function will store the selected category in localStorage
+function updateLocalStorageWithSelectedCategory(categoryId, categoryName, categoryColor) {
+    localStorage.setItem('selectedSubjectId', categoryId);
+    localStorage.setItem('selectedSubjectValue', categoryName);
+    localStorage.setItem('selectedSubjectColor', categoryColor); // Optional, if you need color
+}
+
+
      </script>
+

@@ -71,9 +71,15 @@
             <input type="hidden" id="selectedDate" />
             <input type="hidden" id="editEventId" />
             <div class="mb-3">
-              <label for="subject" class="form-label">Subject</label>
-              <input type="text" class="form-control" id="subject" required />
+              <label class="form-label d-block">Subject</label>
+              <div class="d-flex align-items-center">
+                <span id="colorCircle" class="me-2" style="width: 20px; height: 20px; border-radius: 50%; background-color: #36A2EB; display: inline-block;"></span>
+                <select class="form-select" id="subject" required>
+                  <!-- Categories will be dynamically added here -->
+                </select>
+              </div>
             </div>
+
             <div class="mb-3">
               <label for="startTime" class="form-label">Start Time</label>
               <input type="time" class="form-control" id="startTime" required />
@@ -83,9 +89,14 @@
               <input type="time" class="form-control" id="endTime" required />
             </div>
             <div class="mb-3">
-              <label for="categoryColor" class="form-label">Category Color</label>
-              <input type="color" class="form-control form-control-color" id="categoryColor" value="#36A2EB" />
+              <label for="totalTime" class="form-label">Total Time Spent</label>
+              <div class="input-group">
+                <input type="number" id="totalHours" class="form-control" placeholder="Hours" min="0" />
+                <span class="input-group-text">:</span>
+                <input type="number" id="totalMinutes" class="form-control" placeholder="Minutes" min="0" max="59" />
+              </div>
             </div>
+
           </div>
           <div class="modal-footer d-flex justify-content-between">
             <button type="button" id="deleteBtn" class="btn btn-outline-danger">Delete</button>
@@ -96,172 +107,275 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
-      const ctx = document.getElementById('studyChart').getContext('2d');
-      const modalEl = document.getElementById('eventModal');
-      const modal = new bootstrap.Modal(modalEl);
-      const eventForm = document.getElementById('eventForm');
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let categories = [];
+    const subjectDropdown = document.getElementById('subject');
+    const colorCircle = document.getElementById('colorCircle');
 
-      let currentEditEvent = null;
+    const calendarEl = document.getElementById('calendar');
+    const ctx = document.getElementById('studyChart').getContext('2d');
+    const modalEl = document.getElementById('eventModal');
+    const modal = new bootstrap.Modal(modalEl);
+    const eventForm = document.getElementById('eventForm');
 
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        editable: true,
-        selectable: true,
+    let currentEditEvent = null;
 
-        dateClick: function (info) {
-          currentEditEvent = null;
-          document.getElementById('eventModalLabel').textContent = "Add Study Session";
-          document.getElementById('selectedDate').value = info.dateStr;
-          document.getElementById('editEventId').value = '';
-          document.getElementById('subject').value = '';
-          document.getElementById('startTime').value = '10:00';
-          document.getElementById('endTime').value = '11:00';
-          document.getElementById('categoryColor').value = '#36A2EB';
-          modal.show();
-        },
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      editable: true,
+      selectable: true,
 
-        eventClick: function (info) {
-          currentEditEvent = info.event;
-          const start = new Date(info.event.start);
-          const end = new Date(info.event.end || start);
+      dateClick: function (info) {
+        currentEditEvent = null;
+        document.getElementById('eventModalLabel').textContent = "Add Study Session";
+        document.getElementById('selectedDate').value = info.dateStr;
+        document.getElementById('editEventId').value = '';
+        document.getElementById('subject').value = '';
+        document.getElementById('startTime').value = '10:00';
+        document.getElementById('endTime').value = '11:00';
+        document.getElementById('totalHours').value = '';
+        document.getElementById('totalMinutes').value = '';
+        updateColorCircle();
+        modal.show();
+      },
 
-          document.getElementById('eventModalLabel').textContent = "Edit Study Session";
-          document.getElementById('editEventId').value = info.event.id;
-          document.getElementById('selectedDate').value = start.toISOString().slice(0, 10);
-          document.getElementById('subject').value = info.event.title;
-          document.getElementById('startTime').value = start.toTimeString().slice(0, 5);
-          document.getElementById('endTime').value = end.toTimeString().slice(0, 5);
-          document.getElementById('categoryColor').value = info.event.backgroundColor || info.event.color || '#36A2EB';
-          modal.show();
-        },
+      eventClick: function (info) {
+        currentEditEvent = info.event;
+        const start = new Date(info.event.start);
+        const end = new Date(info.event.end || start);
 
-        events: [],
-        eventAdd: updateChart,
-        eventChange: updateChart,
-        eventRemove: updateChart
+        // Use nullish coalescing operator to preserve 0 if it's the actual value
+        const totalMinutes = info.event.extendedProps.totalMinutes ?? Math.floor((end - start) / (1000 * 60));
+
+        document.getElementById('eventModalLabel').textContent = "Edit Study Session";
+        document.getElementById('editEventId').value = info.event.id;
+        document.getElementById('selectedDate').value = start.toISOString().slice(0, 10);
+        document.getElementById('startTime').value = start.toTimeString().slice(0, 5);
+        document.getElementById('endTime').value = end.toTimeString().slice(0, 5);
+
+        // Set subject dropdown value
+        for (let option of subjectDropdown.options) {
+          if (option.text === info.event.title) {
+            option.selected = true;
+            break;
+          }
+        }
+
+        // Properly split total minutes into hours and remaining minutes
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        document.getElementById('totalHours').value = hours;
+        document.getElementById('totalMinutes').value = minutes;
+
+        updateColorCircle();
+        modal.show();
+      },
+
+      events: [],
+      eventAdd: updateChart,
+      eventChange: updateChart,
+      eventRemove: updateChart
+    });
+
+    calendar.render();
+
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => {
+        categories = data;
+        subjectDropdown.innerHTML = categories.map(cat =>
+          `<option value="${cat.category_id}" data-color="${cat.category_color}">${cat.category_name}</option>`
+        ).join('');
+        updateColorCircle();
       });
-    
-        calendar.render();
-        fetch('/api/sessions')
-        .then(res => res.json())
-        .then(events => {
-            events.forEach(event => calendar.addEvent(event));
-            updateChart(); 
-        })
-        .catch(err => console.error('Failed to load sessions:', err));
-        calendar.render();
 
+    fetch('/api/sessions')
+      .then(res => res.json())
+      .then(events => {
+        events.forEach(event => {
+          calendar.addEvent({
+            id: event.session_id,
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            color: event.color,
+            extendedProps: {
+              totalMinutes: event.total_minutes
+            }
+          });
+        });
+        updateChart();
+      })
+      .catch(err => console.error('Failed to load sessions:', err));
 
-
-      const studyChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Hours',
-            data: [],
-            backgroundColor: [],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Hours'
-              }
+    const studyChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Hours',
+          data: [],
+          backgroundColor: [],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Hours'
             }
           }
         }
-      });
+      }
+    });
 
     eventForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
+      e.preventDefault();
 
-        const title = document.getElementById('subject').value;
-        const date = document.getElementById('selectedDate').value;
-        const start = date + 'T' + document.getElementById('startTime').value;
-        const end = date + 'T' + document.getElementById('endTime').value;
-        const color = document.getElementById('categoryColor').value;
+      const title = subjectDropdown.options[subjectDropdown.selectedIndex].text;
+      const color = subjectDropdown.options[subjectDropdown.selectedIndex].getAttribute('data-color');
+      const date = document.getElementById('selectedDate').value;
+      const start = date + 'T' + document.getElementById('startTime').value;
+      const end = date + 'T' + document.getElementById('endTime').value;
 
-        if (currentEditEvent) {
-            currentEditEvent.setProp('title', title);
-            currentEditEvent.setStart(start);
-            currentEditEvent.setEnd(end);
-            currentEditEvent.setProp('color', color);
+      const totalHours = parseInt(document.getElementById('totalHours').value, 10) || 0;
+      const totalMinutes = parseInt(document.getElementById('totalMinutes').value, 10) || 0;
+      const totalTimeSpent = totalHours * 60 + totalMinutes;
 
-        } else {
-            const newEvent = calendar.addEvent({
-            title: title,
-            start: start,
-            end: end,
-            color: color
-            });
+      if (currentEditEvent) {
+        const categoryId = parseInt(subjectDropdown.value, 10);
 
-            try {
-            const response = await fetch('/api/sessions', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                title,
-                start_time: start,
-                end_time: end
-                })
-            });
+        currentEditEvent.setProp('title', title);
+        currentEditEvent.setStart(start);
+        currentEditEvent.setEnd(end);
+        currentEditEvent.setProp('color', color);
+        currentEditEvent.setExtendedProp('totalMinutes', totalTimeSpent);
 
-            if (!response.ok) {
-                console.error('Failed to save session');
-            }
-            } catch (err) {
-            console.error('Error saving session:', err);
-            }
+        try {
+          await fetch(`/api/sessions/${currentEditEvent.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              category_id: categoryId,
+              start_time: start,
+              end_time: end,
+              total_minutes: totalTimeSpent
+            })
+          });
+
+
+          if (!response.ok) {
+            console.error('Failed to update session');
+          }
+        } catch (err) {
+          console.error('Error updating session:', err);
         }
-
-        modal.hide();
-        updateChart();
-        });
-
-      document.getElementById('deleteBtn').addEventListener('click', function () {
-        currentEditEvent.remove();
-        modal.hide();
-        updateChart();
-      });
-
-      function updateChart() {
-        const events = calendar.getEvents();
-        const subjectTotals = {};
-        const colorMap = {};
-
-        events.forEach(event => {
-          const title = event.title;
-          const start = new Date(event.start);
-          const end = new Date(event.end || start);
-          const duration = (end - start) / (1000 * 60 * 60); 
-
-          if (subjectTotals[title]) {
-            subjectTotals[title] += duration;
-          } else {
-            subjectTotals[title] = duration;
-            colorMap[title] = event.backgroundColor || event.color || '#36A2EB';
+      }
+ else {
+        calendar.addEvent({
+          title: title,
+          start: start,
+          end: end,
+          color: color,
+          extendedProps: {
+            totalMinutes: totalTimeSpent
           }
         });
 
-        studyChart.data.labels = Object.keys(subjectTotals);
-        studyChart.data.datasets[0].data = Object.values(subjectTotals).map(val => parseFloat(val.toFixed(2)));
-        studyChart.data.datasets[0].backgroundColor = Object.keys(subjectTotals).map(label => colorMap[label] || '#36A2EB');
-        studyChart.update();
+        try {
+          const response = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title,
+              start_time: start,
+              end_time: end,
+              total_minutes: totalTimeSpent
+            })
+          });
+
+          if (!response.ok) {
+            console.error('Failed to save session');
+          }
+        } catch (err) {
+          console.error('Error saving session:', err);
+        }
       }
 
+      modal.hide();
       updateChart();
     });
-  </script>
+
+    document.getElementById('deleteBtn').addEventListener('click', async function () {
+      if (currentEditEvent) {
+        try {
+          const response = await fetch(`/api/sessions/${currentEditEvent.id}`, {
+            method: 'DELETE'
+          });
+
+          if (!response.ok) {
+            console.error('Failed to delete session');
+            return;
+          }
+
+          currentEditEvent.remove();
+          currentEditEvent = null;
+          modal.hide();
+          updateChart();
+        } catch (err) {
+          console.error('Error deleting session:', err);
+        }
+      }
+    });
+
+
+    function updateChart() {
+      const events = calendar.getEvents();
+      const subjectTotals = {};
+      const colorMap = {};
+
+      events.forEach(event => {
+        const title = event.title;
+        const start = new Date(event.start);
+        const end = new Date(event.end || start);
+
+        // Use totalMinutes from extendedProps if available, fallback to duration
+        const totalMinutes = event.extendedProps.totalMinutes ?? (end - start) / (1000 * 60);
+        const duration = totalMinutes / 60;
+
+        if (subjectTotals[title]) {
+          subjectTotals[title] += duration;
+        } else {
+          subjectTotals[title] = duration;
+          colorMap[title] = event.backgroundColor || event.color || '#36A2EB';
+        }
+      });
+
+      studyChart.data.labels = Object.keys(subjectTotals);
+      studyChart.data.datasets[0].data = Object.values(subjectTotals).map(val => parseFloat(val.toFixed(2)));
+      studyChart.data.datasets[0].backgroundColor = Object.keys(subjectTotals).map(label => colorMap[label] || '#36A2EB');
+      studyChart.update();
+    }
+
+
+    subjectDropdown.addEventListener('change', updateColorCircle);
+
+    function updateColorCircle() {
+      const selected = subjectDropdown.options[subjectDropdown.selectedIndex];
+      if (selected) {
+        colorCircle.style.backgroundColor = selected.getAttribute('data-color');
+      }
+    }
+  });
+</script>
+
+
+
 </body>
 </html>
