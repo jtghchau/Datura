@@ -172,42 +172,50 @@
     }
 
     function restartTimer() {
+        // Save the session before resetting the timer
+        saveSessionToDatabase(); 
+
+        // Clear the interval to stop the current timer
         clearInterval(timer);
+
+        // Reset state
         remainingSeconds = 0;
+        totalSeconds = 0;
         progressBar.style.width = '0%';
         isPaused = false;
 
-        // Reset pause icon to default (pause)
+        // Reset the pause button to its initial state (pause icon)
         const pauseIcon = document.getElementById('pauseIcon');
         pauseIcon.classList.remove('bi-play-fill');
         pauseIcon.classList.add('bi-pause-fill');
 
-        // Show setup, hide countdown
+        // Hide the countdown view and show the setup view
         setupView.style.display = 'block';
         countdownView.style.display = 'none';
     }
 
     // Save the session and update the calendar
+    // Function to save the session to the database
     function saveSessionToDatabase() {
-        if (!selectedSubjectValue) {
+        const subjectName = localStorage.getItem('selectedSubjectValue');
+        const subjectId = localStorage.getItem('selectedSubjectId'); // Optional, in case you want to use ID later
+
+        if (!subjectName) {
             alert("Please select a subject before finishing the session!");
             return;
         }
 
-        // Calculate the total minutes of the session
         const totalMinutes = Math.round((totalSeconds - remainingSeconds) / 60);
         const startTime = sessionStartTime;
-        const endTime = new Date(); // Right now
+        const endTime = new Date();
 
-
-        // Send the session data to the backend
         fetch('/api/sessions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                title: selectedSubjectValue,  // Subject name
+                title: subjectName, // Use the fresh one from localStorage
                 start_time: startTime.toISOString(),
                 end_time: endTime.toISOString(),
                 total_minutes: totalMinutes,
@@ -217,7 +225,6 @@
         .then(data => {
             if (data.message === 'Session saved successfully.') {
                 alert('Session saved successfully!');
-                // Fetch the updated sessions and update the calendar
                 updateCalendar();
             } else {
                 alert('Failed to save session.');
