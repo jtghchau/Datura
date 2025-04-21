@@ -224,22 +224,77 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        //dropdown menu functionality 
-         document.querySelectorAll('.dropdown-item').forEach(item => {
-            item.addEventListener('click', event => {
-                const selected = item.getAttribute('data-value');
-                const color = item.getAttribute('data-color');
-                const subjectSpan = document.getElementById('selectedSubject');
+    document.addEventListener('DOMContentLoaded', () => {
+        const subjectSpan = document.getElementById('selectedSubject');
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
 
-                // Replace contents with color dot + text
+        // Helper: reset to placeholder
+        function resetSubjectSelection() {
+            localStorage.removeItem('selectedSubjectId');
+            localStorage.removeItem('selectedSubjectValue');
+            window.selectedSubjectId = null;
+            window.selectedSubjectValue = null;
+            subjectSpan.innerHTML = 'Select Category';
+            subjectSpan.classList.add('placeholder-text');
+        }
+
+        // Attach click event to each dropdown item
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const selectedId = item.getAttribute('data-id');
+                const selectedName = item.getAttribute('data-value');
+                const color = item.getAttribute('data-color');
+
+                // Save selection
+                localStorage.setItem('selectedSubjectId', selectedId);
+                localStorage.setItem('selectedSubjectValue', selectedName);
+                window.selectedSubjectId = selectedId;
+                window.selectedSubjectValue = selectedName;
+
+                // Update dropdown UI
                 subjectSpan.innerHTML = `
                     <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                    ${selected}
+                    ${selectedName}
                 `;
                 subjectSpan.classList.remove('placeholder-text');
             });
         });
-    </script>
+
+        // On load, try to restore saved subject
+        const savedId = localStorage.getItem('selectedSubjectId');
+        const savedName = localStorage.getItem('selectedSubjectValue');
+
+        if (savedId && savedName) {
+            // Check if the saved subject still exists in the dropdown
+            const validIds = Array.from(dropdownItems).map(item =>
+                item.getAttribute('data-id')
+            );
+
+            if (validIds.includes(savedId)) {
+                // Valid subject – restore it
+                const item = Array.from(dropdownItems).find(i => i.getAttribute('data-id') === savedId);
+                const color = item.getAttribute('data-color');
+
+                window.selectedSubjectId = savedId;
+                window.selectedSubjectValue = savedName;
+
+                subjectSpan.innerHTML = `
+                    <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
+                    ${savedName}
+                `;
+                subjectSpan.classList.remove('placeholder-text');
+            } else {
+                // Invalid subject – reset
+                resetSubjectSelection();
+                console.log('Subject not found in dropdown. LocalStorage cleared.');
+            }
+        } else {
+            resetSubjectSelection(); // Just in case nothing was selected
+        }
+    });
+</script>
+
+
 
     <script>
  document.addEventListener('DOMContentLoaded', () => {
@@ -349,6 +404,7 @@
     }
   });
 });
+
 
 
 
