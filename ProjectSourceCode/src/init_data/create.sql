@@ -26,19 +26,6 @@ CREATE TABLE sessions (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
--- Calender
-CREATE TABLE calendar_events (
-    event_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    username VARCHAR(50),
-    title TEXT NOT NULL,
-    description TEXT,
-    event_start TIMESTAMP,
-    event_end TIMESTAMP,
-    FOREIGN KEY (username) REFERENCES users(username)
-);
-
-
-
 -- Clothes/Store
 CREATE TABLE clothing_items (
     item_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
