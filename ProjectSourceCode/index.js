@@ -400,16 +400,30 @@ app.post('/api/sessions', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized. Please log in.' });
   }
 
-  const { title, start_time, end_time } = req.body;
+  const { title, start_time, end_time, total_minutes } = req.body;
 
-  if (!start_time || !end_time) {
+  if (!start_time || !end_time || !title || total_minutes === undefined) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
+  const start = new Date(start_time);
+  const end = new Date(end_time);
+
   try {
+    // Look up or create category
+    const category = await db.oneOrNone(
+      'SELECT category_id FROM categories WHERE category_name = $1 AND username = $2',
+      [title, user.username]
+    );
+
+    if (!category) {
+      return res.status(400).json({ error: 'Category not found for subject: ' + title });
+    }
+
     await db.none(
-      'INSERT INTO sessions (username, start_time, end_time) VALUES ($1, $2, $3)',
-      [user.username, start_time, end_time]
+      `INSERT INTO sessions (username, category_id, start_time, end_time, total_minutes)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [user.username, category.category_id, start_time, end_time, total_minutes]
     );
 
     res.status(201).json({ message: 'Session saved successfully.' });
@@ -420,10 +434,11 @@ app.post('/api/sessions', async (req, res) => {
 });
 
 
+
+
 // *****************************************************
 //               Get Study Sessions API
 // *****************************************************
-
 app.get('/api/sessions', async (req, res) => {
   const user = req.session.user;
   if (!user) {
@@ -432,24 +447,27 @@ app.get('/api/sessions', async (req, res) => {
 
   try {
     const sessions = await db.any(
-      'SELECT session_id, start_time, end_time FROM sessions WHERE username = $1',
+      `SELECT 
+         s.session_id,
+         c.category_name AS title,
+         to_char(s.start_time, 'YYYY-MM-DD"T"HH24:MI:SS') AS start,
+         to_char(s.end_time, 'YYYY-MM-DD"T"HH24:MI:SS') AS end,
+         c.category_color AS color,
+         s.total_minutes
+       FROM sessions s
+       JOIN categories c ON s.category_id = c.category_id
+       WHERE s.username = $1`,
       [user.username]
     );
 
-    // Format for FullCalendar
-    const formatted = sessions.map(session => ({
-      id: session.session_id,
-      title: 'Study',
-      start: session.start_time,
-      end: session.end_time
-    }));
-
-    res.json(formatted);
+    res.json(sessions);
   } catch (err) {
     console.error('Error fetching sessions:', err);
     res.status(500).json({ error: 'Failed to load sessions' });
   }
 });
+
+
 
 
 
@@ -539,6 +557,33 @@ app.delete('/api/categories/:id', (req, res) => {
       res.status(500).json({ error: 'Failed to delete category' });
     });
 });
+
+app.get('/api/categories/:id', async (req, res) => {
+  const user = req.session.user;
+  const id = req.params.id;
+
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const category = await db.oneOrNone(
+      'SELECT category_id, category_name FROM categories WHERE category_id = $1 AND username = $2',
+      [id, user.username]
+    );
+
+    if (category) {
+      res.json(category);
+    } else {
+      res.status(404).json({ error: 'Category not found' });
+    }
+  } catch (err) {
+    console.error('Error validating category:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
 
 
 

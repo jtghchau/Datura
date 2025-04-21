@@ -22,8 +22,21 @@ CREATE TABLE sessions (
     username VARCHAR(50),
     start_time TIMESTAMP,
     end_time TIMESTAMP,
+    total_minutes INTEGER,
     FOREIGN KEY (username) REFERENCES users(username)
 );
+
+-- Calender
+CREATE TABLE calendar_events (
+    event_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    username VARCHAR(50),
+    title TEXT NOT NULL,
+    description TEXT,
+    event_start TIMESTAMP,
+    event_end TIMESTAMP,
+    FOREIGN KEY (username) REFERENCES users(username)
+);
+
 
 
 -- Clothes/Store
@@ -50,17 +63,6 @@ CREATE TABLE study_notes (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     pos_left INTEGER DEFAULT 0,  -- Horizontal position of the note
     pos_top INTEGER DEFAULT 0,   -- Vertical position of the note
-    FOREIGN KEY (username) REFERENCES users(username)
-);
-
--- Calender
-CREATE TABLE calendar_events (
-    event_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    username VARCHAR(50),
-    title TEXT NOT NULL,
-    description TEXT,
-    event_start TIMESTAMP,
-    event_end TIMESTAMP,
     FOREIGN KEY (username) REFERENCES users(username)
 );
 

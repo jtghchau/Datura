@@ -52,6 +52,24 @@
         const addSubjectBtn = document.getElementById('addSubjectBtn');
         const subjectModal = new bootstrap.Modal(document.getElementById('subjectModal'));
 
+        // Restore from localStorage on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const storedValue = localStorage.getItem('selectedSubjectValue');
+            const storedColor = localStorage.getItem('selectedSubjectColor');
+
+            if (storedValue && storedColor) {
+                selectedSubjectValue = storedValue;
+                selectedSubjectColor = storedColor;
+
+                subjectSpan.innerHTML = `
+                    <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
+                    ${selectedSubjectValue}
+                `;
+                subjectSpan.classList.remove('placeholder-text');
+            }
+        });
+
+
         const nameInput = document.getElementById('subjectNameInput');
         const colorInput = document.getElementById('subjectColorInput');
         const nameError = document.getElementById('subjectNameError');
@@ -63,6 +81,10 @@
                 selectedSubjectValue = item.getAttribute('data-value');
                 selectedSubjectColor = item.getAttribute('data-color');
 
+                // Save to localStorage
+                localStorage.setItem('selectedSubjectValue', selectedSubjectValue);
+                localStorage.setItem('selectedSubjectColor', selectedSubjectColor);
+
                 subjectSpan.innerHTML = `
                     <span class="subject-color-circle" style="background-color: ${selectedSubjectColor}; margin-right: 8px;"></span>
                     ${selectedSubjectValue}
@@ -70,6 +92,7 @@
                 subjectSpan.classList.remove('placeholder-text');
             });
         });
+
 
         // Open modal with pre-filled values
         addSubjectBtn.addEventListener('click', () => {
@@ -90,6 +113,9 @@
             colorInput.value = '#ffffff';
             hideErrors();
             updateModalUI();
+
+            localStorage.removeItem('selectedSubjectValue');
+            localStorage.removeItem('selectedSubjectColor');
         });
 
         // Save button logic
@@ -245,61 +271,67 @@
 
     // Delete Category logic
     document.getElementById('deleteSubjectBtn').addEventListener('click', () => {
-        if (selectedSubjectValue) {
-            // We're editing — delete from DB
-            const dropdownItems = document.querySelectorAll('.dropdown-item');
-            let categoryIdToDelete = null;
+    if (selectedSubjectValue) {
+        // We're editing
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        let categoryIdToDelete = null;
 
-            dropdownItems.forEach(item => {
-                if (item.getAttribute('data-value') === selectedSubjectValue) {
-                    categoryIdToDelete = item.getAttribute('data-id');
-                }
-            });
+        dropdownItems.forEach(item => {
+            if (item.getAttribute('data-value') === selectedSubjectValue) {
+                categoryIdToDelete = item.getAttribute('data-id');
+            }
+        });
 
-            if (!categoryIdToDelete) {
-                console.error('Could not find category to delete');
+        if (!categoryIdToDelete) {
+            console.error('Could not find category to delete');
+            return;
+        }
+
+        console.log(`/api/categories/${categoryIdToDelete}`); //debugging log
+        fetch(`/api/categories/${categoryIdToDelete}`, {
+            method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Failed to delete category:', data.error);
                 return;
             }
-            console.log(`/api/categories/${categoryIdToDelete}`);//delete
-            fetch(`/api/categories/${categoryIdToDelete}`, {
-                method: 'DELETE'
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    console.error('Failed to delete category:', data.error);
-                    return;
+
+            // Remove from dropdown
+            dropdownItems.forEach(item => {
+                if (item.getAttribute('data-id') === categoryIdToDelete) {
+                    item.parentElement.remove(); // remove <li>
                 }
-
-                // Remove from dropdown
-                dropdownItems.forEach(item => {
-                    if (item.getAttribute('data-id') === categoryIdToDelete) {
-                        item.parentElement.remove(); // remove <li>
-                    }
-                });
-
-                // Reset
-                selectedSubjectValue = null;
-                selectedSubjectColor = null;
-                subjectSpan.innerHTML = 'Select Category';
-                subjectSpan.classList.add('placeholder-text');
-                nameInput.value = '';
-                colorInput.value = '#ffffff';
-                hideErrors();
-
-                subjectModal.hide();
-            })
-            .catch(err => {
-                console.error('Error deleting category:', err);
             });
-        } else {
-            // We're in create mode — just cancel
+
+            // Reset the UI
+            selectedSubjectValue = null;
+            selectedSubjectColor = null;
+            subjectSpan.innerHTML = 'Select Category';
+            subjectSpan.classList.add('placeholder-text');
             nameInput.value = '';
             colorInput.value = '#ffffff';
             hideErrors();
+
+            // Clear localStorage
+            localStorage.removeItem('selectedSubjectValue');
+            localStorage.removeItem('selectedSubjectColor');
+
             subjectModal.hide();
-        }
-    });
+        })
+        .catch(err => {
+            console.error('Error deleting category:', err);
+        });
+    } else {
+        // We're in create mode — just cancel
+        nameInput.value = '';
+        colorInput.value = '#ffffff';
+        hideErrors();
+        subjectModal.hide();
+    }
+});
+
 
 
     function hideErrors() {
