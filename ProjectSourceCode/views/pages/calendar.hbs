@@ -249,12 +249,35 @@
       const totalTimeSpent = totalHours * 60 + totalMinutes;
 
       if (currentEditEvent) {
+        const categoryId = parseInt(subjectDropdown.value, 10);
+
         currentEditEvent.setProp('title', title);
         currentEditEvent.setStart(start);
         currentEditEvent.setEnd(end);
         currentEditEvent.setProp('color', color);
         currentEditEvent.setExtendedProp('totalMinutes', totalTimeSpent);
-      } else {
+
+        try {
+          await fetch(`/api/sessions/${currentEditEvent.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              category_id: categoryId,
+              start_time: start,
+              end_time: end,
+              total_minutes: totalTimeSpent
+            })
+          });
+
+
+          if (!response.ok) {
+            console.error('Failed to update session');
+          }
+        } catch (err) {
+          console.error('Error updating session:', err);
+        }
+      }
+ else {
         calendar.addEvent({
           title: title,
           start: start,
@@ -289,14 +312,28 @@
       updateChart();
     });
 
-    document.getElementById('deleteBtn').addEventListener('click', function () {
+    document.getElementById('deleteBtn').addEventListener('click', async function () {
       if (currentEditEvent) {
-        currentEditEvent.remove();
-        currentEditEvent = null;
-        modal.hide();
-        updateChart();
+        try {
+          const response = await fetch(`/api/sessions/${currentEditEvent.id}`, {
+            method: 'DELETE'
+          });
+
+          if (!response.ok) {
+            console.error('Failed to delete session');
+            return;
+          }
+
+          currentEditEvent.remove();
+          currentEditEvent = null;
+          modal.hide();
+          updateChart();
+        } catch (err) {
+          console.error('Error deleting session:', err);
+        }
       }
     });
+
 
     function updateChart() {
       const events = calendar.getEvents();

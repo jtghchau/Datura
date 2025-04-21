@@ -467,6 +467,45 @@ app.get('/api/sessions', async (req, res) => {
   }
 });
 
+//route to EDIT a session
+app.patch('/api/sessions/:id', async (req, res) => {
+  const { id } = req.params;
+  const { category_id, start_time, end_time, total_minutes } = req.body;
+
+  console.log(`PATCH /api/sessions/${id}`, req.body);
+
+  try {
+    await db.none(
+      `UPDATE sessions SET 
+        category_id = $1,
+        start_time = $2, 
+        end_time = $3, 
+        total_minutes = $4 
+      WHERE session_id = $5`,
+      [category_id, start_time, end_time, total_minutes, id]
+    );    
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Update error:", err);
+    res.sendStatus(500);
+  }
+});
+
+//route to DELETE a session
+app.delete('/api/sessions/:id', async (req, res) => {
+  const sessionId = req.params.id;
+
+  try {
+    await db.none('DELETE FROM sessions WHERE session_id = $1', [sessionId]);
+    res.sendStatus(204); // No Content
+  } catch (err) {
+    console.error('Error deleting session:', err);
+    res.sendStatus(500);
+  }
+});
+
+
+
 
 
 

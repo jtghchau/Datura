@@ -224,75 +224,76 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const subjectSpan = document.getElementById('selectedSubject');
-        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        document.addEventListener('DOMContentLoaded', () => {
+            const subjectSpan = document.getElementById('selectedSubject');
+            const dropdownMenu = document.querySelector('.custom-dropdown');
 
-        // Helper: reset to placeholder
-        function resetSubjectSelection() {
-            localStorage.removeItem('selectedSubjectId');
-            localStorage.removeItem('selectedSubjectValue');
-            window.selectedSubjectId = null;
-            window.selectedSubjectValue = null;
-            subjectSpan.innerHTML = 'Select Category';
-            subjectSpan.classList.add('placeholder-text');
-        }
+            // Set selection function for any subject
+            function selectSubject(id, name, color) {
+                localStorage.setItem('selectedSubjectId', id);
+                localStorage.setItem('selectedSubjectValue', name);
+                localStorage.setItem('selectedSubjectColor', color);
 
-        // Attach click event to each dropdown item
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const selectedId = item.getAttribute('data-id');
-                const selectedName = item.getAttribute('data-value');
-                const color = item.getAttribute('data-color');
+                window.selectedSubjectId = id;
+                window.selectedSubjectValue = name;
+                window.selectedSubjectColor = color;
 
-                // Save selection
-                localStorage.setItem('selectedSubjectId', selectedId);
-                localStorage.setItem('selectedSubjectValue', selectedName);
-                window.selectedSubjectId = selectedId;
-                window.selectedSubjectValue = selectedName;
-
-                // Update dropdown UI
                 subjectSpan.innerHTML = `
                     <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                    ${selectedName}
+                    ${name}
                 `;
                 subjectSpan.classList.remove('placeholder-text');
+            }
+
+            // Handle dropdown item click using delegation (works for new items too)
+            dropdownMenu.addEventListener('click', (e) => {
+                const item = e.target.closest('.dropdown-item');
+                if (item) {
+                    e.preventDefault();
+                    const id = item.getAttribute('data-id');
+                    const name = item.getAttribute('data-value');
+                    const color = item.getAttribute('data-color');
+                    selectSubject(id, name, color);
+                }
             });
+
+            // Try to restore saved subject on load
+            const savedId = localStorage.getItem('selectedSubjectId');
+            const savedName = localStorage.getItem('selectedSubjectValue');
+            const savedColor = localStorage.getItem('selectedSubjectColor');
+
+            if (savedId && savedName && savedColor) {
+                // Check if the subject still exists in the dropdown list
+                const validIds = Array.from(dropdownMenu.querySelectorAll('.dropdown-item')).map(item =>
+                    item.getAttribute('data-id')
+                );
+
+                if (validIds.includes(savedId)) {
+                    selectSubject(savedId, savedName, savedColor);
+                } else {
+                    localStorage.clear();
+                    subjectSpan.innerText = 'Select Category';
+                    subjectSpan.classList.add('placeholder-text');
+                }
+            }
+
+            // Ensure that the subject is correctly reflected in the dropdown on load
+            // If the saved subject exists, it will be highlighted in the dropdown.
+            const selectedSubjectId = localStorage.getItem('selectedSubjectId');
+            if (selectedSubjectId) {
+                const selectedItem = dropdownMenu.querySelector(`[data-id="${selectedSubjectId}"]`);
+                if (selectedItem) {
+                    selectSubject(
+                        selectedItem.getAttribute('data-id'),
+                        selectedItem.getAttribute('data-value'),
+                        selectedItem.getAttribute('data-color')
+                    );
+                }
+            }
         });
 
-        // On load, try to restore saved subject
-        const savedId = localStorage.getItem('selectedSubjectId');
-        const savedName = localStorage.getItem('selectedSubjectValue');
+    </script>
 
-        if (savedId && savedName) {
-            // Check if the saved subject still exists in the dropdown
-            const validIds = Array.from(dropdownItems).map(item =>
-                item.getAttribute('data-id')
-            );
-
-            if (validIds.includes(savedId)) {
-                // Valid subject – restore it
-                const item = Array.from(dropdownItems).find(i => i.getAttribute('data-id') === savedId);
-                const color = item.getAttribute('data-color');
-
-                window.selectedSubjectId = savedId;
-                window.selectedSubjectValue = savedName;
-
-                subjectSpan.innerHTML = `
-                    <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
-                    ${savedName}
-                `;
-                subjectSpan.classList.remove('placeholder-text');
-            } else {
-                // Invalid subject – reset
-                resetSubjectSelection();
-                console.log('Subject not found in dropdown. LocalStorage cleared.');
-            }
-        } else {
-            resetSubjectSelection(); // Just in case nothing was selected
-        }
-    });
-</script>
 
 
 
