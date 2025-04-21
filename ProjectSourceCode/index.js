@@ -69,11 +69,7 @@ app.get('/welcome', (req, res) => {
     res.json({ status: 'success', message: 'Welcome!' });
 });
 
-app.get('/home', requireLogin, (req, res) => {
-    res.render('pages/home');
-});
-
-app.get('/settings', requireLogin, (req, res) => {
+app.get('/settings', (req, res) => {
     res.render('pages/settings');
 });
 
@@ -408,17 +404,31 @@ app.post('/api/sessions', async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized. Please log in.' });
     }
 
-    const { title, start_time, end_time } = req.body;
+  const { title, start_time, end_time, total_minutes } = req.body;
 
-    if (!start_time || !end_time) {
-        return res.status(400).json({ error: 'Missing required fields.' });
+  if (!start_time || !end_time || !title || total_minutes === undefined) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  const start = new Date(start_time);
+  const end = new Date(end_time);
+
+  try {
+    // Look up or create category
+    const category = await db.oneOrNone(
+      'SELECT category_id FROM categories WHERE category_name = $1 AND username = $2',
+      [title, user.username]
+    );
+
+    if (!category) {
+      return res.status(400).json({ error: 'Category not found for subject: ' + title });
     }
 
-    try {
-        await db.none(
-            'INSERT INTO sessions (username, start_time, end_time) VALUES ($1, $2, $3)',
-            [user.username, start_time, end_time]
-        );
+    await db.none(
+      `INSERT INTO sessions (username, category_id, start_time, end_time, total_minutes)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [user.username, category.category_id, start_time, end_time, total_minutes]
+    );
 
         res.status(201).json({ message: 'Session saved successfully.' });
     } catch (err) {
@@ -428,33 +438,217 @@ app.post('/api/sessions', async (req, res) => {
 });
 
 
+
+
 // *****************************************************
 //               Get Study Sessions API
 // *****************************************************
-
 app.get('/api/sessions', async (req, res) => {
     const user = req.session.user;
     if (!user) {
         return res.status(401).json({ error: 'Unauthorized. Please log in.' });
     }
 
-    try {
-        const sessions = await db.any(
-            'SELECT session_id, start_time, end_time FROM sessions WHERE username = $1',
-            [user.username]
-        );
+  try {
+    const sessions = await db.any(
+      `SELECT 
+         s.session_id,
+         c.category_name AS title,
+         to_char(s.start_time, 'YYYY-MM-DD"T"HH24:MI:SS') AS start,
+         to_char(s.end_time, 'YYYY-MM-DD"T"HH24:MI:SS') AS end,
+         c.category_color AS color,
+         s.total_minutes
+       FROM sessions s
+       JOIN categories c ON s.category_id = c.category_id
+       WHERE s.username = $1`,
+      [user.username]
+    );
 
-        // Format for FullCalendar
-        const formatted = sessions.map(session => ({
-            id: session.session_id,
-            title: 'Study',
-            start: session.start_time,
-            end: session.end_time
-        }));
-
-        res.json(formatted);
-    } catch (err) {
-        console.error('Error fetching sessions:', err);
-        res.status(500).json({ error: 'Failed to load sessions' });
-    }
+    res.json(sessions);
+  } catch (err) {
+    console.error('Error fetching sessions:', err);
+    res.status(500).json({ error: 'Failed to load sessions' });
+  }
 });
+
+//route to EDIT a session
+app.patch('/api/sessions/:id', async (req, res) => {
+  const { id } = req.params;
+  const { category_id, start_time, end_time, total_minutes } = req.body;
+
+  console.log(`PATCH /api/sessions/${id}`, req.body);
+
+  try {
+    await db.none(
+      `UPDATE sessions SET 
+        category_id = $1,
+        start_time = $2, 
+        end_time = $3, 
+        total_minutes = $4 
+      WHERE session_id = $5`,
+      [category_id, start_time, end_time, total_minutes, id]
+    );    
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Update error:", err);
+    res.sendStatus(500);
+  }
+});
+
+//route to DELETE a session
+app.delete('/api/sessions/:id', async (req, res) => {
+  const sessionId = req.params.id;
+
+  try {
+    await db.none('DELETE FROM sessions WHERE session_id = $1', [sessionId]);
+    res.sendStatus(204); // No Content
+  } catch (err) {
+    console.error('Error deleting session:', err);
+    res.sendStatus(500);
+  }
+});
+
+
+
+
+
+
+
+// *****************************************************
+//               APIs for categories
+// *****************************************************
+
+app.post('/api/categories', async (req, res) => {
+  const user = req.session.user;
+
+  const { category_name, category_color } = req.body;
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  if (!category_name || !category_color) {
+    return res.status(400).json({ error: 'Missing category name or color' });
+  }
+
+  try {
+    const newCategory = await db.one(
+      `INSERT INTO categories (username, category_name, category_color)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [user.username, category_name, category_color]
+    );
+
+    res.status(201).json(newCategory);
+  } catch (err) {
+    console.error('Error inserting category:', err);
+    res.status(500).json({ error: 'Could not insert category' });
+  }
+});
+
+
+app.get('/api/categories', async (req, res) => {
+  const user = req.session.user;
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const categories = await db.any(
+      'SELECT * FROM categories WHERE username = $1',
+      [user.username]
+    );
+    res.json(categories);
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.status(500).json({ error: 'Could not fetch categories' });
+  }
+});
+
+//for editing categories
+app.put('/api/categories/:id', async (req, res) => {
+  const user = req.session.user;
+  const { id } = req.params;
+  const { category_name, category_color } = req.body;
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const updated = await db.one(
+      `UPDATE categories
+       SET category_name = $1, category_color = $2
+       WHERE category_id = $3 AND username = $4
+       RETURNING *`,
+      [category_name, category_color, id, user.username]
+    );
+    res.json(updated);
+  } catch (err) {
+    console.error('Error updating category:', err);
+    res.status(500).json({ error: 'Could not update category' });
+  }
+});
+
+//for deleting categories
+app.delete('/api/categories/:id', (req, res) => {
+  const categoryId = req.params.id;
+  console.log(`Deleting category with ID: ${categoryId}`);
+
+  // Use pg-promise to execute the delete query
+  db.none('DELETE FROM categories WHERE category_id = $1', [categoryId])
+    .then(() => {
+      res.json({ success: true });
+    })
+    .catch(err => {
+      console.error('Error deleting category:', err);
+      res.status(500).json({ error: 'Failed to delete category' });
+    });
+});
+
+app.get('/api/categories/:id', async (req, res) => {
+  const user = req.session.user;
+  const id = req.params.id;
+
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const category = await db.oneOrNone(
+      'SELECT category_id, category_name FROM categories WHERE category_id = $1 AND username = $2',
+      [id, user.username]
+    );
+
+    if (category) {
+      res.json(category);
+    } else {
+      res.status(404).json({ error: 'Category not found' });
+    }
+  } catch (err) {
+    console.error('Error validating category:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
+
+
+
+//        Home page API
+app.get('/home', async (req, res) => {
+  const user = req.session.user;
+
+  if (!user) return res.redirect('/register');
+
+  try {
+    const categories = await db.any(
+      'SELECT category_id, category_name, category_color FROM categories WHERE username = $1',
+      [user.username]
+    );
+
+    res.render('pages/home', { categories });
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.render('home', { categories: [] });
+  }
+});
+
+
+
+

@@ -282,35 +282,26 @@
             <span>{{coins}}</span>
         </div>
 
-        <div class="dropdown-container d-flex align-items-center gap-2">
-            <div class="dropdown">
-                <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <span id="selectedSubject" class="placeholder-text">Select Subject</span>
-                </button>
-                <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
+    <div class="dropdown-container d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="dropdown-toggle subject-btn" type="button" id="subjectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <span id="selectedSubject" class="placeholder-text">Select Category</span>
+            </button>
+            <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
+                {{#each categories}}
                     <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#" data-value="Math"
-                            data-color="#4F8EF7">
-                            <span class="subject-color-circle" style="background-color: #4F8EF7;"></span>
-                            Math
+                        <a class="dropdown-item d-flex align-items-center"
+                            href="#"
+                            data-id="{{this.category_id}}"
+                            data-value="{{this.category_name}}"
+                            data-color="{{this.category_color}}">
+                            <span class="subject-color-circle" style="background-color: {{this.category_color}};"></span>
+                            {{this.category_name}}
                         </a>
+
                     </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#" data-value="English"
-                            data-color="#F78E4F">
-                            <span class="subject-color-circle" style="background-color: #F78E4F;"></span>
-                            English
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#" data-value="History"
-                            data-color="#8E44AD">
-                            <span class="subject-color-circle" style="background-color: #8E44AD;"></span>
-                            History
-                        </a>
-                    </li>
-                </ul>
+                {{/each}}
+            </ul>
 
             </div>
             <button class="btn btn-light d-flex align-items-center justify-content-center" id="addSubjectBtn">
@@ -344,6 +335,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+<<<<<<< HEAD
         //dropdown menu functionality 
         document.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', event => {
@@ -352,9 +344,80 @@
                 const subjectSpan = document.getElementById('selectedSubject');
                 subjectSpan.textContent = selected;
                 subjectSpan.classList.remove('placeholder-text'); // make text black
+=======
+        document.addEventListener('DOMContentLoaded', () => {
+            const subjectSpan = document.getElementById('selectedSubject');
+            const dropdownMenu = document.querySelector('.custom-dropdown');
+
+            // Set selection function for any subject
+            function selectSubject(id, name, color) {
+                localStorage.setItem('selectedSubjectId', id);
+                localStorage.setItem('selectedSubjectValue', name);
+                localStorage.setItem('selectedSubjectColor', color);
+
+                window.selectedSubjectId = id;
+                window.selectedSubjectValue = name;
+                window.selectedSubjectColor = color;
+
+                subjectSpan.innerHTML = `
+                    <span class="subject-color-circle" style="background-color: ${color}; margin-right: 8px;"></span>
+                    ${name}
+                `;
+                subjectSpan.classList.remove('placeholder-text');
+            }
+
+            // Handle dropdown item click using delegation (works for new items too)
+            dropdownMenu.addEventListener('click', (e) => {
+                const item = e.target.closest('.dropdown-item');
+                if (item) {
+                    e.preventDefault();
+                    const id = item.getAttribute('data-id');
+                    const name = item.getAttribute('data-value');
+                    const color = item.getAttribute('data-color');
+                    selectSubject(id, name, color);
+                }
+>>>>>>> Calendar
             });
+
+            // Try to restore saved subject on load
+            const savedId = localStorage.getItem('selectedSubjectId');
+            const savedName = localStorage.getItem('selectedSubjectValue');
+            const savedColor = localStorage.getItem('selectedSubjectColor');
+
+            if (savedId && savedName && savedColor) {
+                // Check if the subject still exists in the dropdown list
+                const validIds = Array.from(dropdownMenu.querySelectorAll('.dropdown-item')).map(item =>
+                    item.getAttribute('data-id')
+                );
+
+                if (validIds.includes(savedId)) {
+                    selectSubject(savedId, savedName, savedColor);
+                } else {
+                    localStorage.clear();
+                    subjectSpan.innerText = 'Select Category';
+                    subjectSpan.classList.add('placeholder-text');
+                }
+            }
+
+            // Ensure that the subject is correctly reflected in the dropdown on load
+            // If the saved subject exists, it will be highlighted in the dropdown.
+            const selectedSubjectId = localStorage.getItem('selectedSubjectId');
+            if (selectedSubjectId) {
+                const selectedItem = dropdownMenu.querySelector(`[data-id="${selectedSubjectId}"]`);
+                if (selectedItem) {
+                    selectSubject(
+                        selectedItem.getAttribute('data-id'),
+                        selectedItem.getAttribute('data-value'),
+                        selectedItem.getAttribute('data-color')
+                    );
+                }
+            }
         });
+
     </script>
+
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -464,6 +527,7 @@
                 }
             });
         });
+
 
 
 

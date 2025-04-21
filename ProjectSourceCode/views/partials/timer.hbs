@@ -48,108 +48,229 @@
 
 
     <script>
-        let timer;
-        let totalSeconds = 0;
-        let remainingSeconds = 0;
-        let isPaused = false;
+    let timer;
+    let totalSeconds = 0;
+    let remainingSeconds = 0;
+    let isPaused = false;
+    let sessionStartTime;
 
-        const setupView = document.getElementById('timerSetup');
-        const countdownView = document.getElementById('timerCountdown');
-        const display = document.getElementById('timerDisplay');
-        const progressBar = document.getElementById('progressBar');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const restartBtn = document.getElementById('restartBtn');
-        const hoursInput = document.getElementById('hoursInput');
-        const minutesInput = document.getElementById('minutesInput');
+    const setupView = document.getElementById('timerSetup');
+    const countdownView = document.getElementById('timerCountdown');
+    const display = document.getElementById('timerDisplay');
+    const progressBar = document.getElementById('progressBar');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const hoursInput = document.getElementById('hoursInput');
+    const minutesInput = document.getElementById('minutesInput');
 
-        // Get the warning message element
-        const subjectWarning = document.getElementById('subjectWarning');
+    // Get the warning message element
+    const subjectWarning = document.getElementById('subjectWarning');
 
-        function formatTime(seconds) {
-            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
-            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-            const secs = String(seconds % 60).padStart(2, '0');
-            return `${hrs}:${mins}:${secs}`;
-        }
+    document.addEventListener('DOMContentLoaded', async () => {
+        const selectedSubjectId = localStorage.getItem('selectedSubjectId');
+        const selectedSubjectValue = localStorage.getItem('selectedSubjectValue');
 
-        function updateDisplay() {
-            display.textContent = formatTime(remainingSeconds);
-            const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
+        if (selectedSubjectId && selectedSubjectValue) {
+            try {
+                const res = await fetch(`/api/categories/${selectedSubjectId}`);
+                if (!res.ok) throw new Error('Subject not found');
 
-        function startTimer() {
-            // Check if a subject is selected
-            if (!selectedSubjectValue) {
-                // If no subject is selected, show the warning message
-                subjectWarning.style.display = 'block';
-                return; // Prevent starting the timer
+                const data = await res.json();
+                window.selectedSubjectId = data.category_id;
+                window.selectedSubjectValue = data.category_name;
+
+                console.log('Validated Subject:', data.category_name);
+            } catch (err) {
+                console.warn('Invalid subject in localStorage, clearing it...');
+                localStorage.removeItem('selectedSubjectId');
+                localStorage.removeItem('selectedSubjectValue');
+                window.selectedSubjectId = null;
+                window.selectedSubjectValue = null;
             }
+        }
+    });
 
-            // Hide the warning message if a subject is selected
-            subjectWarning.style.display = 'none';
 
-            const hours = parseInt(hoursInput.value) || 0;
-            const minutes = parseInt(minutesInput.value) || 0;
-            totalSeconds = remainingSeconds = hours * 3600 + minutes * 60;
+    function formatTime(seconds) {
+        const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+        const secs = String(seconds % 60).padStart(2, '0');
+        return `${hrs}:${mins}:${secs}`;
+    }
 
-            if (totalSeconds <= 0) return;
+    function updateDisplay() {
+        display.textContent = formatTime(remainingSeconds);
 
-            setupView.style.display = 'none';
-            countdownView.style.display = 'block';
-            updateDisplay();
+        const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
 
-            timer = setInterval(() => {
+    function startTimer() {
+        if (!window.selectedSubjectValue) {
+            // If no subject is selected, show the warning message
+            subjectWarning.style.display = 'block';
+            return; // Don't start the timer if no subject is selected
+        }
+
+        // Hide the warning if a subject is selected
+        subjectWarning.style.display = 'none';
+
+        // Get the hours and minutes entered by the user
+        const hours = parseInt(hoursInput.value) || 0;  // Default to 0 if not entered
+        const minutes = parseInt(minutesInput.value) || 0;
+
+        // Convert the time into total seconds (easier to work with)
+        totalSeconds = remainingSeconds = hours * 3600 + minutes * 60;
+
+        // If the total time is 0 or less, don't start the timer
+        if (totalSeconds <= 0) return;
+
+        // Hide the setup and show the countdown
+        setupView.style.display = 'none';
+        countdownView.style.display = 'block';
+
+        // Update the display immediately with the initial time
+        updateDisplay();
+
+        sessionStartTime = new Date();
+
+        // Start a timer that updates every second
+        timer = setInterval(() => {
             if (!isPaused && remainingSeconds > 0) {
                 remainingSeconds--;
                 updateDisplay();
-                if (remainingSeconds === 0) {
+            }
+
+            // When the timer reaches 0, stop and show the "Time's up" popup
+            if (remainingSeconds === 0) {
                 clearInterval(timer);
                 document.getElementById('popupOverlay').style.display = 'flex';
-                }
+                saveSessionToDatabase();  // Save the session data when the timer finishes
             }
-            }, 1000);
-        }
+        }, 1000);
+    }
 
-        document.getElementById('closePopupBtn').addEventListener('click', () => {
-            document.getElementById('popupOverlay').style.display = 'none';
-            restartTimer();
-        });
+    document.getElementById('closePopupBtn').addEventListener('click', () => {
+        document.getElementById('popupOverlay').style.display = 'none';
+        restartTimer();
+    });
 
+    function pauseTimer() {
+        isPaused = !isPaused;
+        const pauseIcon = document.getElementById('pauseIcon');
 
-        function pauseTimer() {
-            isPaused = !isPaused;
-            const pauseIcon = document.getElementById('pauseIcon');
-
-            if (isPaused) {
-                pauseIcon.classList.remove('bi-pause-fill');
-                pauseIcon.classList.add('bi-play-fill');
-            } else {
-                pauseIcon.classList.remove('bi-play-fill');
-                pauseIcon.classList.add('bi-pause-fill');
-            }
-        }
-
-
-        function restartTimer() {
-            clearInterval(timer);
-            remainingSeconds = 0;
-            progressBar.style.width = '0%';
-            isPaused = false;
-
-            // Reset pause icon to default (pause)
-            const pauseIcon = document.getElementById('pauseIcon');
+        if (isPaused) {
+            // Change icon to 'play' when paused
+            pauseIcon.classList.remove('bi-pause-fill');
+            pauseIcon.classList.add('bi-play-fill');
+        } else {
+            // Change icon to 'pause' when resumed
             pauseIcon.classList.remove('bi-play-fill');
             pauseIcon.classList.add('bi-pause-fill');
+        }
+    }
 
-            // Show setup, hide countdown
-            setupView.style.display = 'block';
-            countdownView.style.display = 'none';
+    function restartTimer() {
+        // Save the session before resetting the timer
+        saveSessionToDatabase(); 
+
+        // Clear the interval to stop the current timer
+        clearInterval(timer);
+
+        // Reset state
+        remainingSeconds = 0;
+        totalSeconds = 0;
+        progressBar.style.width = '0%';
+        isPaused = false;
+
+        // Reset the pause button to its initial state (pause icon)
+        const pauseIcon = document.getElementById('pauseIcon');
+        pauseIcon.classList.remove('bi-play-fill');
+        pauseIcon.classList.add('bi-pause-fill');
+
+        // Hide the countdown view and show the setup view
+        setupView.style.display = 'block';
+        countdownView.style.display = 'none';
+    }
+
+    // Save the session and update the calendar
+    // Function to save the session to the database
+    function saveSessionToDatabase() {
+        const subjectName = localStorage.getItem('selectedSubjectValue');
+        const subjectId = localStorage.getItem('selectedSubjectId'); // Optional, in case you want to use ID later
+
+        if (!subjectName) {
+            alert("Please select a subject before finishing the session!");
+            return;
         }
 
+        const totalMinutes = Math.round((totalSeconds - remainingSeconds) / 60);
+        const startTime = sessionStartTime;
+        const endTime = new Date();
 
-        startBtn.addEventListener('click', startTimer);
-        pauseBtn.addEventListener('click', pauseTimer);
-        restartBtn.addEventListener('click', restartTimer);
-        </script>
+        fetch('/api/sessions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: subjectName, // Use the fresh one from localStorage
+                start_time: startTime.toISOString(),
+                end_time: endTime.toISOString(),
+                total_minutes: totalMinutes,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Session saved successfully.') {
+                alert('Session saved successfully!');
+                updateCalendar();
+            } else {
+                alert('Failed to save session.');
+            }
+        })
+        .catch(err => {
+            console.error('Error saving session:', err);
+            alert('Error saving session.');
+        });
+    }
+
+    // Fetch the sessions from the backend and update the calendar
+    function updateCalendar() {
+        fetch('/api/sessions')
+        .then(response => response.json())
+        .then(sessions => {
+            // Assuming you have a function to update your calendar with the sessions data
+            updateCalendarView(sessions);
+        })
+        .catch(err => {
+            console.error('Error fetching sessions:', err);
+        });
+    }
+
+    // Function to update the calendar with new session data
+    function updateCalendarView(sessions) {
+        // This function will depend on how you are currently rendering your calendar
+        // For example, if you're using a library or a custom calendar view,
+        // you'll need to update the calendar view with the new session data.
+
+        // Example of updating a simple calendar view with session data:
+        sessions.forEach(session => {
+            const event = {
+                title: session.title,
+                start: session.start,
+                end: session.end,
+                color: session.color,
+            };
+
+            // Here you would add the event to your calendar view
+            // This could involve updating the calendar UI directly or
+            // triggering a render function if you're using a calendar library.
+        });
+    }
+
+    startBtn.addEventListener('click', startTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    restartBtn.addEventListener('click', restartTimer);
+</script>
