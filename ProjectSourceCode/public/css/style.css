@@ -3,6 +3,14 @@ body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+body {
+  background-image: url('/images/background1.png');
+  background-size: cover;  
+  background-position: center; 
+  background-attachment: fixed;
+  height: 100vh;
+}
+
 body.hide-nav nav {
   display: none !important;
 }

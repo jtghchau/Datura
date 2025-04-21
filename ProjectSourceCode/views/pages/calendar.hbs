@@ -14,14 +14,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    body {
-      background-image: url('images/background1.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      height: 100vh;
-    }
+    h1 {
+      margin: 45px 0;
+      color: white;
 
+    }
     #calendar, #chart-container {
       background: white;
       padding: 1rem;
@@ -38,12 +35,81 @@
         margin-bottom: 1rem;
       }
     }
+
+    .fc .fc-col-header-cell-cushion {
+      color: black;
+      text-decoration: none;
+    }
+
+    .fc .fc-daygrid-day-number {
+      color: black;
+      text-decoration: none;
+    }
+  
+    /* Style the "Today" button */
+    .fc .fc-today-button {
+      background-color: #6cb4e7; 
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.4em 0.8em;
+    }
+
+    .fc .fc-today-button:hover {
+      background-color: #5f9bc5;
+      cursor: pointer;
+    }
+
+    .fc .fc-button-primary:disabled {
+      background-color: #a0b8d8;
+      border: none;
+    }
+
+    .fc .fc-prev-button, .fc .fc-next-button {
+      background-color: transparent; 
+      color: black;
+      border: none; 
+    }
+
+    .fc .fc-prev-button:hover, .fc .fc-next-button:hover {
+      color: #5f9bc5; 
+      background-color: transparent; 
+      border: none; 
+      cursor: pointer;
+    }
+
+      /* Remove background color and outline on click for the arrow buttons */
+    .fc .fc-prev-button:focus,
+    .fc .fc-next-button:focus,
+    .fc .fc-prev-button:active,
+    .fc .fc-next-button:active {
+      background-color: transparent !important; 
+      outline: none !important;
+    }
+
+    .fc .fc-prev-button:focus-visible,
+    .fc .fc-next-button:focus-visible {
+      background-color: transparent !important;
+      outline: none !important;
+    }
+
+    /* Remove unwanted effects */
+    .fc .fc-today-button:focus,
+    .fc .fc-today-button:active,
+    .fc .fc-today-button:focus-visible {
+      background-color: #a3b1c2 !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+
+
   </style>
 </head>
 
 <body class="bg-light">
   <div class="container py-4">
-    <h1 class="text-center fw-bold mb-4">Calendar Dashboard</h1>
+    <h1 class="text-center fw-bold">Calendar & Dashboard</h1>
 
     <div class="row gy-4 gx-4">
       <div class="col-12 col-md-6">
@@ -241,8 +307,29 @@
       const title = subjectDropdown.options[subjectDropdown.selectedIndex].text;
       const color = subjectDropdown.options[subjectDropdown.selectedIndex].getAttribute('data-color');
       const date = document.getElementById('selectedDate').value;
-      const start = date + 'T' + document.getElementById('startTime').value;
-      const end = date + 'T' + document.getElementById('endTime').value;
+      const startTimeValue = document.getElementById('startTime').value;
+      const endTimeValue = document.getElementById('endTime').value;
+
+      const start = date + 'T' + startTimeValue;
+      let end;
+
+      if (endTimeValue === '00:00') {
+        // If user picks 00:00, treat it as next day at midnight
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        end = nextDay.toISOString().slice(0, 10) + 'T00:00';
+      } else {
+        end = date + 'T' + endTimeValue;
+
+        // Extra safeguard: if end <= start, shift end to next day
+        if (end <= start) {
+          const nextDay = new Date(date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          end = nextDay.toISOString().slice(0, 10) + 'T' + endTimeValue;
+        }
+      }
+
+
 
       const totalHours = parseInt(document.getElementById('totalHours').value, 10) || 0;
       const totalMinutes = parseInt(document.getElementById('totalMinutes').value, 10) || 0;
@@ -289,11 +376,11 @@
         });
 
         try {
-          const response = await fetch('/api/sessions', {
-            method: 'POST',
+          const response = await fetch(`/api/sessions/${currentEditEvent.id}`, {
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              title,
+              category_id: categoryId,
               start_time: start,
               end_time: end,
               total_minutes: totalTimeSpent
@@ -301,11 +388,12 @@
           });
 
           if (!response.ok) {
-            console.error('Failed to save session');
+            console.error('Failed to update session');
           }
         } catch (err) {
-          console.error('Error saving session:', err);
+          console.error('Error updating session:', err);
         }
+
       }
 
       modal.hide();
