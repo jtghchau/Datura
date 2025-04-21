@@ -177,24 +177,19 @@
                 <span id="selectedSubject" class="placeholder-text">Select Category</span>
             </button>
             <ul class="dropdown-menu custom-dropdown" aria-labelledby="subjectDropdown">
-                <li>
-                    <a class="dropdown-item d-flex align-items-center" href="#" data-value="Math" data-color="#4F8EF7">
-                        <span class="subject-color-circle" style="background-color: #4F8EF7;"></span>
-                        Math
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item d-flex align-items-center" href="#" data-value="English" data-color="#F78E4F">
-                        <span class="subject-color-circle" style="background-color: #F78E4F;"></span>
-                        English
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item d-flex align-items-center" href="#" data-value="History" data-color="#8E44AD">
-                        <span class="subject-color-circle" style="background-color: #8E44AD;"></span>
-                        History
-                    </a>
-                </li>
+                {{#each categories}}
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center"
+                            href="#"
+                            data-id="{{this.category_id}}"
+                            data-value="{{this.category_name}}"
+                            data-color="{{this.category_color}}">
+                            <span class="subject-color-circle" style="background-color: {{this.category_color}};"></span>
+                            {{this.category_name}}
+                        </a>
+
+                    </li>
+                {{/each}}
             </ul>
 
         </div>

@@ -5,28 +5,26 @@ CREATE TABLE users (
     coins INTEGER DEFAULT 0
 );
 
--- Goals
-CREATE TABLE goals (
-    goal_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    username VARCHAR(50),
-    title TEXT NOT NULL,
-    description TEXT,
-    is_completed BOOLEAN DEFAULT false,
-    reward_coins INTEGER DEFAULT 10,
-    completed_at TIMESTAMP,
+-- Categories
+CREATE TABLE categories (
+    category_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    category_name TEXT NOT NULL,
+    category_color VARCHAR(60) NOT NULL, 
+    username VARCHAR(50), 
     FOREIGN KEY (username) REFERENCES users(username)
 );
 
--- Study (might have to delete this table)
+
+-- Study
 CREATE TABLE sessions (
     session_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    category_id INTEGER REFERENCES categories(category_id) ON DELETE CASCADE,
     username VARCHAR(50),
-    goal_id INTEGER,
     start_time TIMESTAMP,
     end_time TIMESTAMP,
-    FOREIGN KEY (username) REFERENCES users(username),
-    FOREIGN KEY (goal_id) REFERENCES goals(goal_id)
+    FOREIGN KEY (username) REFERENCES users(username)
 );
+
 
 -- Clothes/Store
 CREATE TABLE clothing_items (
