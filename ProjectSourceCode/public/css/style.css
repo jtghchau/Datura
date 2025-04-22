@@ -1,5 +1,5 @@
 body {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -75,6 +75,7 @@ body.hide-nav nav {
   padding: 5px 10px;
   border-radius: 25px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
 }
 .coin-box img {
   width: 24px; 
