@@ -233,17 +233,15 @@
     .then(response => response.json())
     .then(data => {
         if (data.message === 'Session saved successfully.') {
-            alert('Session saved successfully!');
             updateCalendar();
             showCoinPopup(totalMinutes);  // Show the popup with the coins earned
             sessionSaved = true;  // Set flag to true to prevent duplicate saves
         } else {
-            alert('Failed to save session.');
+            console.log('Failed to save session.');
         }
     })
     .catch(err => {
         console.error('Error saving session:', err);
-        alert('Error saving session.');
     });
 }
 
