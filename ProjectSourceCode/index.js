@@ -424,10 +424,20 @@ app.post('/api/sessions', async (req, res) => {
       return res.status(400).json({ error: 'Category not found for subject: ' + title });
     }
 
+    // Insert the session into the sessions table
     await db.none(
       `INSERT INTO sessions (username, category_id, start_time, end_time, total_minutes)
        VALUES ($1, $2, $3, $4, $5)`,
       [user.username, category.category_id, start_time, end_time, total_minutes]
+    );
+
+    // Update the user's coins based on the total minutes of the session
+    const coinsEarned = total_minutes;
+    await db.none(
+      `UPDATE users
+       SET coins = coins + $1
+       WHERE username = $2`,
+      [coinsEarned, user.username]
     );
 
     res.status(201).json({ message: 'Session saved successfully.' });
@@ -642,11 +652,25 @@ app.get('/home', async (req, res) => {
       [user.username]
     );
 
-    res.render('pages/home', { categories });
+    const result = await db.oneOrNone(
+      'SELECT coins FROM users WHERE username = $1',
+      [user.username]
+    );
+
+    const coins = result ? result.coins : 0;
+
+    res.render('pages/home', {
+      categories,
+      coins
+    });
   } catch (err) {
-    console.error('Error fetching categories:', err);
-    res.render('home', { categories: [] });
+    console.error('Error fetching data for home page:', err);
+    res.render('pages/home', {
+      categories: [],
+      coins: 0
+    });
   }
 });
+
 
 
