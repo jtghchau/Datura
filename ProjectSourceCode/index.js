@@ -994,12 +994,14 @@ app.post('/leaderboard/invite', async (req, res) => {
           req.session.user.username]
       );
 
-      //adds both users as members
+      // add only the inviter as a member
+      //prior it caused leaderboard to show up on the pending user
       await db.none(
-          `INSERT INTO leaderboard_members (leaderboard_id, username)
-           VALUES ($1, $2), ($1, $3)`,
-          [leaderboard.leaderboard_id, req.session.user.username, friend_username]
+        `INSERT INTO leaderboard_members (leaderboard_id, username)
+        VALUES ($1, $2)`,
+        [leaderboard.leaderboard_id, req.session.user.username]
       );
+
 
       //creates invite 
       await db.none(
@@ -1054,7 +1056,7 @@ app.post('/leaderboard/invite/accept', async (req, res) => {
       }
 
       //redirect to leaderboard page with leaderboard-id
-      res.redirect(`/leaderboard?leaderboard_id=${invite.leaderboard_id}`);
+      res.redirect(`/leaderboard/${invite.leaderboard_id}`);
   } catch (error) {
       console.error('Error accepting invite:', error);
       res.redirect('/friends?error=Could not accept invite');
