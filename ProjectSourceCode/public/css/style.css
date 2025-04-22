@@ -34,14 +34,14 @@ body.hide-nav nav {
   left: 0;
   width: 100%;
   height: auto;
-  z-index: 1; /* Shadow is below the avatar */
-  animation: shadowShrink 1.9s ease-in-out infinite; /* Apply shadow animation */
-  transform-origin: bottom center; /* Scale from the bottom */
+  z-index: 1; 
+  animation: shadowShrink 1.9s ease-in-out infinite; 
+  transform-origin: bottom center; 
 }
 
 .base-avatar {
-  z-index: 2; /* Avatar is above the shadow */
-  animation: float 1.9s ease-in-out infinite; /* Apply float animation */
+  z-index: 2; 
+  animation: float 1.9s ease-in-out infinite; 
 }
 
 @keyframes float {
@@ -49,7 +49,7 @@ body.hide-nav nav {
       transform: translateY(0);
   }
   50% {
-      transform: translateY(-10px); /* Adjust the float distance */
+      transform: translateY(-10px);
   }
   100% {
       transform: translateY(0);
@@ -58,13 +58,13 @@ body.hide-nav nav {
 
 @keyframes shadowShrink {
   0% {
-      transform: scale(1); /* Shadow at normal size */
+      transform: scale(1);
   }
   50% {
-      transform: scale(0.97); /* Shadow shrinks slightly as avatar rises */
+      transform: scale(0.97);
   }
   100% {
-      transform: scale(1); /* Shadow returns to original size */
+      transform: scale(1); 
   }
 }
 
