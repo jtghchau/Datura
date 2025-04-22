@@ -1,6 +1,6 @@
 -- Insert Test User
 INSERT INTO users (username, password, coins) VALUES
-('testuser', '$2a$10$4cVIPRhM9m7yx1ahCbor9.gEjGHuPyH064X8JqWfl8o/GQBH4.hqe', 100);
+('testuser', '$2a$10$4cVIPRhM9m7yx1ahCbor9.gEjGHuPyH064X8JqWfl8o/GQBH4.hqe', 2125);
 
 -- Insert categories associated with the testuser
 INSERT INTO categories (category_name, category_color, username) VALUES

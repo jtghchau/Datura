@@ -40,6 +40,11 @@
     <div id="popupOverlay" class="popup-overlay" style="display: none;">
         <div id="timerPopup" class="timer-popup">
             <h2>Time's up!</h2>
+            <p style="font-weight: bold; margin: 0;">Coins earned:</p>
+            <div class="popup-coinbox">
+                <img src="/images/coin.png" alt="Coin"> 
+                <span id="coinsEarned">0</span>
+            </div>
             <p>Great job, you completed your study session. Reset your timer to continue studying or take a break!</p>
             <button id="closePopupBtn">Close</button>
         </div>
@@ -145,9 +150,18 @@
     }
 
     document.getElementById('closePopupBtn').addEventListener('click', () => {
+        const earnedCoins = parseInt(document.getElementById('coinsEarned').textContent, 10);
+        const coinDisplay = document.getElementById('coinDisplay');
+
+        if (coinDisplay && !isNaN(earnedCoins)) {
+            const currentCoins = parseInt(coinDisplay.textContent, 10) || 0;
+            coinDisplay.textContent = currentCoins + earnedCoins;
+        }
+
         document.getElementById('popupOverlay').style.display = 'none';
         restartTimer();
     });
+
 
     function pauseTimer() {
         isPaused = !isPaused;
@@ -166,8 +180,11 @@
 
     function restartTimer() {
         if (!sessionSaved) {
-            saveSessionToDatabase();  // Save the session before resetting the timer
+            saveSessionToDatabase();  // Save session before restarting if not saved
         }
+
+        // Reset session flag when restarting
+        sessionSaved = false;  // Reset flag to allow saving a new session if necessary
 
         clearInterval(timer);
         remainingSeconds = 0;
@@ -182,49 +199,76 @@
         setupView.style.display = 'block';
         countdownView.style.display = 'none';
 
-        sessionSaved = false;  // Reset flag when restarting
+        // Ensure the popup doesn't show up when restarting
+        document.getElementById('popupOverlay').style.display = 'none';
     }
+
 
     // Function to save the session to the database
     function saveSessionToDatabase() {
-        const subjectName = localStorage.getItem('selectedSubjectValue');
-        const subjectId = localStorage.getItem('selectedSubjectId'); // Optional, in case you want to use ID later
+    const subjectName = localStorage.getItem('selectedSubjectValue');
+    const subjectId = localStorage.getItem('selectedSubjectId');
 
-        if (!subjectName) {
-            alert("Please select a subject before finishing the session!");
-            return;
-        }
-
-        const totalMinutes = Math.round((totalSeconds - remainingSeconds) / 60);
-        const startTime = sessionStartTime;
-        const endTime = new Date();
-
-        fetch('/api/sessions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                title: subjectName, // Use the fresh one from localStorage
-                start_time: startTime.toISOString(),
-                end_time: endTime.toISOString(),
-                total_minutes: totalMinutes,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message === 'Session saved successfully.') {
-                alert('Session saved successfully!');
-                updateCalendar();
-            } else {
-                alert('Failed to save session.');
-            }
-        })
-        .catch(err => {
-            console.error('Error saving session:', err);
-            alert('Error saving session.');
-        });
+    if (!subjectName) {
+        alert("Please select a subject before finishing the session!");
+        return;
     }
+
+    const totalMinutes = Math.round((totalSeconds - remainingSeconds) / 60);
+    const startTime = sessionStartTime;
+    const endTime = new Date();
+
+    fetch('/api/sessions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            title: subjectName, // Use the fresh one from localStorage
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
+            total_minutes: totalMinutes,
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Session saved successfully.') {
+            alert('Session saved successfully!');
+            updateCalendar();
+            showCoinPopup(totalMinutes);  // Show the popup with the coins earned
+            sessionSaved = true;  // Set flag to true to prevent duplicate saves
+        } else {
+            alert('Failed to save session.');
+        }
+    })
+    .catch(err => {
+        console.error('Error saving session:', err);
+        alert('Error saving session.');
+    });
+}
+
+// Function to show the coin popup after the session is saved
+function showCoinPopup(totalMinutes) {
+    const coinsEarned = totalMinutes;
+    const coinsElement = document.getElementById('coinsEarned');
+
+    // Make sure the coins element is updated correctly
+    if (coinsElement) {
+        coinsElement.textContent = coinsEarned;
+    } else {
+        console.error('Error: Coin element not found.');
+    }
+
+    // Show the popup overlay with the updated coin count
+    const popupOverlay = document.getElementById('popupOverlay');
+    if (popupOverlay) {
+        popupOverlay.style.display = 'flex';  // Show the popup overlay
+    } else {
+        console.error('Error: Popup overlay element not found.');
+    }
+}
+
+
 
     // Fetch the sessions from the backend and update the calendar
     function updateCalendar() {

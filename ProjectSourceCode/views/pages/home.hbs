@@ -41,19 +41,6 @@
             transform: translateX(-50%);
         }
 
-        .coin-box {
-            display: flex;
-            background-color: white;
-            padding: 5px 10px;
-            border-radius: 25px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .coin-box img {
-            width: 24px; /* Adjust size of the coin image */
-            height: 24px; /* Adjust size of the coin image */
-            margin-right: 4px; /* Space between image and text */
-        }
-
         .home-icons {
             gap: 7px;
             padding-top: 0px !important;
@@ -157,11 +144,7 @@
 
     <div id="stickyNotesContainer"></div>
     <div class="container-fluid d-flex justify-content-between align-items-center p-3">
-        <!-- Coins Box -->
-        <div class="coin-box">
-            <img src="/images/coin.png" alt="Coin"> 
-            <span>{{coins}}</span>
-        </div>
+        {{> coins}}
 
     <div class="dropdown-container d-flex align-items-center gap-2">
         <div class="dropdown">

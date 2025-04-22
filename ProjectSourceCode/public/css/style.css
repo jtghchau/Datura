@@ -31,6 +31,33 @@ body.hide-nav nav {
   height: auto;
 }
 
+.coin-box {
+  display: flex;
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.coin-box img {
+  width: 24px; 
+  height: 24px; 
+  margin-right: 4px; 
+}
+
+.popup-coinbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.popup-coinbox img {
+  width: 24px;
+  height: 24px; 
+  margin-right: 4px;
+}
+
 
 /* timer */
 
