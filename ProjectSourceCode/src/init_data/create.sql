@@ -30,17 +30,30 @@ CREATE TABLE sessions (
 CREATE TABLE clothing_items (
     item_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name TEXT NOT NULL,
-    cost INTEGER NOT NULL
+    cost INTEGER NOT NULL,
+    category TEXT NOT NULL,
+    image_path TEXT NOT NULL
 );
 
 CREATE TABLE user_clothing (
     username VARCHAR(50),
     item_id INTEGER,
-    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (username, item_id),
     FOREIGN KEY (username) REFERENCES users(username),
     FOREIGN KEY (item_id) REFERENCES clothing_items(item_id)
 );
+
+CREATE TABLE equipped_items (
+    username VARCHAR(50) PRIMARY KEY,
+    head_item_id INTEGER,
+    body_item_id INTEGER,
+    pants_item_id INTEGER,
+    FOREIGN KEY (username) REFERENCES users(username),
+    FOREIGN KEY (head_item_id) REFERENCES clothing_items(item_id),
+    FOREIGN KEY (body_item_id) REFERENCES clothing_items(item_id),
+    FOREIGN KEY (pants_item_id) REFERENCES clothing_items(item_id)
+);
+
 
 -- Notes
 CREATE TABLE study_notes (

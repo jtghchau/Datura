@@ -49,10 +49,6 @@ app.get('/notes', requireLogin, (req, res) => {
     res.render('pages/notes');
 });
 
-app.get('/store', requireLogin, (req, res) => {
-    res.render('pages/store');
-});
-
 app.get('/calendar', requireLogin, (req, res) => {
     res.render('pages/calendar');
 });
@@ -646,7 +642,9 @@ app.get('/api/categories/:id', async (req, res) => {
 
 
 
-//        Home page API
+// *****************************************************
+//                    Home
+// *****************************************************
 app.get('/home', async (req, res) => {
   const user = req.session.user;
 
@@ -1177,3 +1175,216 @@ try {
 });
 
 
+// *****************************************************
+//                    Store
+// *****************************************************
+app.get('/store', async (req, res) => {
+  const user = req.session.user;
+
+  if (!user) return res.redirect('/register');
+
+  try {
+    const result = await db.oneOrNone(
+      'SELECT coins FROM users WHERE username = $1',
+      [user.username]
+    );
+
+    const coins = result ? result.coins : 0;
+
+    res.render('pages/store', {
+      coins
+    });
+  } catch (err) {
+    console.error('Error fetching data for home page:', err);
+    res.render('pages/home', {
+      coins: 0
+    });
+  }
+});
+
+//get clothing category
+app.get('/api/store/:category', async (req, res) => {
+  const { category } = req.params;
+  const user = req.session.user;
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+
+  const username = user.username;
+
+  try {
+    const items = await db.any(`
+      SELECT ci.item_id, ci.name, ci.image_path, ci.cost,
+        uc.item_id IS NOT NULL AS owned,
+        (
+          (ci.category = 'head' AND ei.head_item_id = ci.item_id) OR
+          (ci.category = 'body' AND ei.body_item_id = ci.item_id) OR
+          (ci.category = 'pants' AND ei.pants_item_id = ci.item_id)
+        ) AS equipped
+      FROM clothing_items ci
+      LEFT JOIN user_clothing uc
+        ON ci.item_id = uc.item_id AND uc.username = $1
+      LEFT JOIN equipped_items ei
+        ON ei.username = $1
+      WHERE ci.category = $2
+    `, [username, category]);
+
+    res.json(items);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
+
+//buy clothes
+app.post('/api/store/buy', async (req, res) => {
+  const user = req.session.user;
+  const { item_id } = req.body;
+
+  if (!user || !item_id) {
+    return res.status(400).json({ error: 'Missing item_id or user' });
+  }
+
+  const username = user.username;
+
+  try {
+    const item = await db.one('SELECT cost FROM clothing_items WHERE item_id = $1', [item_id]);
+    const dbUser = await db.one('SELECT coins FROM users WHERE username = $1', [username]);
+
+    if (dbUser.coins < item.cost) {
+      return res.status(400).json({ error: 'Not enough coins' });
+    }
+
+    await db.tx(async t => {
+      await t.none('UPDATE users SET coins = coins - $1 WHERE username = $2', [item.cost, username]);
+      await t.none('INSERT INTO user_clothing (username, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [username, item_id]);
+    });
+
+    const updated = await db.one('SELECT coins FROM users WHERE username = $1', [username]);
+    res.json({ success: true, coins: updated.coins });
+  } catch (err) {
+    console.error('Error occurred during buy operation:', err);
+    res.status(500).json({ error: 'Buy failed' });
+  }
+});
+
+
+
+//equip clothes
+app.post('/api/store/equip', async (req, res) => {
+  const user = req.session.user;
+  const { item_id } = req.body;
+
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+
+  const username = user.username;
+
+  try {
+    const item = await db.one(`
+      SELECT category FROM clothing_items WHERE item_id = $1
+    `, [item_id]);
+
+    const owned = await db.oneOrNone(`
+      SELECT 1 FROM user_clothing WHERE username = $1 AND item_id = $2
+    `, [username, item_id]);
+
+    if (!owned) {
+      return res.status(403).json({ error: 'Item not owned' });
+    }
+
+    const col = {
+      head: 'head_item_id',
+      body: 'body_item_id',
+      pants: 'pants_item_id'
+    }[item.category];
+
+    if (!col) {
+      return res.status(400).json({ error: 'Invalid category' });
+    }
+
+    await db.none(`
+      INSERT INTO equipped_items (username, ${col})
+      VALUES ($1, $2)
+      ON CONFLICT (username) DO UPDATE SET ${col} = $2
+    `, [username, item_id]);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Equip error:', err);
+    res.status(500).json({ error: 'Equip failed' });
+  }
+});
+
+
+//UNequip clothes
+app.post('/api/store/unequip', async (req, res) => {
+  const user = req.session.user;
+  const { category } = req.body;
+
+  if (!user || !category) return res.status(400).json({ error: 'Missing category or user' });
+
+  const username = user.username;
+
+  try {
+    // Check if the item is equipped by looking at the specific category columns
+    let equippedItem;
+    if (category === 'head') {
+      equippedItem = await db.oneOrNone('SELECT 1 FROM equipped_items WHERE username = $1 AND head_item_id IS NOT NULL', [username]);
+    } else if (category === 'body') {
+      equippedItem = await db.oneOrNone('SELECT 1 FROM equipped_items WHERE username = $1 AND body_item_id IS NOT NULL', [username]);
+    } else if (category === 'pants') {
+      equippedItem = await db.oneOrNone('SELECT 1 FROM equipped_items WHERE username = $1 AND pants_item_id IS NOT NULL', [username]);
+    }
+
+    if (!equippedItem) {
+      return res.status(400).json({ error: 'Item is not equipped' });
+    }
+
+    // Remove the equipped item from the corresponding category column
+    if (category === 'head') {
+      await db.none('UPDATE equipped_items SET head_item_id = NULL WHERE username = $1', [username]);
+    } else if (category === 'body') {
+      await db.none('UPDATE equipped_items SET body_item_id = NULL WHERE username = $1', [username]);
+    } else if (category === 'pants') {
+      await db.none('UPDATE equipped_items SET pants_item_id = NULL WHERE username = $1', [username]);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Unequip failed' });
+  }
+});
+
+
+
+//get all the clothes a user has
+app.get('/api/user/items', async (req, res) => {
+  const user = req.session.user;
+
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+
+  const username = user.username;
+
+  try {
+    // Fetch all owned items
+    const ownedRows = await db.any('SELECT item_id FROM user_clothing WHERE username = $1', [username]);
+
+    // Fetch equipped items based on specific columns (head_item_id, body_item_id, pants_item_id)
+    const equippedRows = await db.any(`
+      SELECT head_item_id, body_item_id, pants_item_id 
+      FROM equipped_items WHERE username = $1`, [username]);
+
+    const owned = ownedRows.map(row => row.item_id);
+    const equipped = equippedRows.length > 0 ? {
+      head: equippedRows[0].head_item_id,
+      body: equippedRows[0].body_item_id,
+      pants: equippedRows[0].pants_item_id
+    } : { head: null, body: null, pants: null };
+
+    res.json({ owned, equipped });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user items' });
+  }
+});

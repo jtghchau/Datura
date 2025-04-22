@@ -3,89 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>home</title>
+    <title>store</title>
 
     <style>
-        body {
-            background-image: url('/images/background1.png');
-            background-size: cover;  
-            background-position: center; 
-            background-attachment: fixed;
-            height: 100vh;
-        }
-
-        .coin-box {
-            display: flex;
-            background-color: white;
-            padding: 5px 10px;
-            border-radius: 25px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .coin-box img {
-            width: 24px; /* Adjust size of the coin image */
-            height: 24px; /* Adjust size of the coin image */
-            margin-right: 4px; /* Space between image and text */
-        }
-
-        .home-icons {
-            gap: 7px;
-            padding-top: 0px !important;
-        }
-
-        .home-icons .icon-link {
-            /*color: white;*/
-            background-color: rgba(255, 255, 255, 0.75);
-            padding: 7px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Vertically center the icon */
-            line-height: 1; 
-            margin-right: auto;
-        }
-
-        .home-icons .icon-link i {
-            font-size: 24px; /* Adjust icon size if needed */
-            display: inline-block; 
+        h1 {
+            color: white;;
         }
 
         .store-container {
             background-color: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 25px;
-            max-width: 900px;
-            margin: 30px auto;
+            width: fit-content;
+            margin: 30px auto;  
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
-        .category-tabs {
+        .store-head {
+            position: relative;
             display: flex;
-            justify-content: center;
+            align-items: center;
+            justify-content: center; /* center tabs container */
             margin-bottom: 20px;
         }
 
+        /* Back arrow */
+        .store-head a {
+            font-size: 2.5rem !important;
+            font-weight: bold;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            left: 0;
+            top: 15%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #445368;
+        }
+
+        /* Tabs are naturally centered by flex + margin auto */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            background-color: aqua;
+            border-radius: 8px;
+            overflow: hidden;
+            width: fit-content;
+            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .tab-button {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 20px;
+            font-size: 1rem;
+            background-color: #dfe6ef;
+            /*border: 1px solid #3f4e62;*/
+            border: none;
+            color: #445368;
             padding: 8px 18px;
-            margin: 0 10px;
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         .tab-button.active,
         .tab-button:hover {
-            background-color: #25a029;
+            background-color: #64a2ce;
             color: white;
-            border-color: #25a029;
+            border-color: #6cb4e7;
         }
+        
 
         .items-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(4, 150px); /* exactly 4 items per row */
             gap: 16px;
+            justify-content: center; /* centers the entire grid horizontally */
         }
+
 
         .item-card {
             background-color: white;
@@ -114,26 +111,27 @@
 </head>
 
 <body>
+    <div class="container-fluid d-flex justify-content-between align-items-center p-3">
+        {{> coins}}
+    </div>
+    <h1 class="text-center fw-bold">Store</h1>
     <div class="store-container">
-        <h2>Clothing Store</h2>
-        <div class="coin-box">
-            <img src="/images/coin.png" alt="Coin">
-            <span>{{coins}}</span>
+        <div class="store-head">
+            <a href="/home">
+                <i class="bi bi-arrow-left-short"></i>
+            </a>
+            <div class="category-tabs">
+                <button class="tab-button active" data-category="head">Head</button>
+                <button class="tab-button" data-category="body">Body</button>
+                <button class="tab-button" data-category="pants">Pants</button>
+            </div>
         </div>
 
-        <div class="category-tabs">
-            <button class="tab-button active" data-category="head">Head</button>
-            <button class="tab-button" data-category="body">Body</button>
-            <button class="tab-button" data-category="pants">Pants</button>
-        </div>
-
-        <div class="items-grid" id="itemsGrid">
-        </div>
+        <div class="items-grid" id="itemsGrid"></div>
     </div>
 </body>
 
 <script>
-    coins = 1000
     const items = [
         { id: 'hat1', name: 'Bow', category: 'head', image: '/images/clothing/bow.png', price: 50 },
         { id: 'hat2', name: 'Sunglasses', category: 'head', image: '/images/clothing/sunglasses.png', price: 75 },
