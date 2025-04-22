@@ -11,4 +11,4 @@ INSERT INTO categories (category_name, category_color, username) VALUES
 INSERT INTO sessions (category_id, username, start_time, end_time, total_minutes) 
 VALUES 
 (1, 'testuser', '2025-04-21 10:00:00', '2025-04-21 12:00:00', 120),
-(2, 'testuser', '2025-04-23 10:00:00', '2025-04-21 12:00:00', 120);
+(2, 'testuser', '2025-04-23 10:00:00', '2025-04-23 12:00:00', 120);

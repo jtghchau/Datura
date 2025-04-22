@@ -216,7 +216,7 @@
 
         document.getElementById('eventModalLabel').textContent = "Edit Study Session";
         document.getElementById('editEventId').value = info.event.id;
-        document.getElementById('selectedDate').value = start.toISOString().slice(0, 10);
+        document.getElementById('selectedDate').value = start.toLocaleDateString('en-CA'); 
         document.getElementById('startTime').value = start.toTimeString().slice(0, 5);
         document.getElementById('endTime').value = end.toTimeString().slice(0, 5);
 
@@ -310,26 +310,25 @@
       const startTimeValue = document.getElementById('startTime').value;
       const endTimeValue = document.getElementById('endTime').value;
 
-      const start = date + 'T' + startTimeValue;
+      // Convert start and end times to UTC
+      const start = new Date(date + 'T' + startTimeValue).toISOString();
       let end;
 
       if (endTimeValue === '00:00') {
         // If user picks 00:00, treat it as next day at midnight
         const nextDay = new Date(date);
         nextDay.setDate(nextDay.getDate() + 1);
-        end = nextDay.toISOString().slice(0, 10) + 'T00:00';
+        end = nextDay.toISOString().slice(0, 10) + 'T00:00:00.000Z';
       } else {
-        end = date + 'T' + endTimeValue;
-
-        // Extra safeguard: if end <= start, shift end to next day
-        if (end <= start) {
+        end = new Date(date + 'T' + endTimeValue).toISOString();
+        
+        // If end <= start, shift end to next day
+        if (new Date(end) <= new Date(start)) {
           const nextDay = new Date(date);
           nextDay.setDate(nextDay.getDate() + 1);
-          end = nextDay.toISOString().slice(0, 10) + 'T' + endTimeValue;
+          end = nextDay.toISOString().slice(0, 10) + 'T' + endTimeValue + ':00.000Z';
         }
       }
-
-
 
       const totalHours = parseInt(document.getElementById('totalHours').value, 10) || 0;
       const totalMinutes = parseInt(document.getElementById('totalMinutes').value, 10) || 0;
@@ -345,7 +344,7 @@
         currentEditEvent.setExtendedProp('totalMinutes', totalTimeSpent);
 
         try {
-          await fetch(`/api/sessions/${currentEditEvent.id}`, {
+          const response = await fetch(`/api/sessions/${currentEditEvent.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -356,15 +355,13 @@
             })
           });
 
-
           if (!response.ok) {
             console.error('Failed to update session');
           }
         } catch (err) {
           console.error('Error updating session:', err);
         }
-      }
- else {
+      } else {
         calendar.addEvent({
           title: title,
           start: start,
@@ -393,12 +390,12 @@
         } catch (err) {
           console.error('Error updating session:', err);
         }
-
       }
 
       modal.hide();
       updateChart();
     });
+
 
     document.getElementById('deleteBtn').addEventListener('click', async function () {
       if (currentEditEvent) {

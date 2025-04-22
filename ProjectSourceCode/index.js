@@ -428,7 +428,13 @@ app.post('/api/sessions', async (req, res) => {
     await db.none(
       `INSERT INTO sessions (username, category_id, start_time, end_time, total_minutes)
        VALUES ($1, $2, $3, $4, $5)`,
-      [user.username, category.category_id, start_time, end_time, total_minutes]
+      [
+        user.username,
+        category.category_id,
+        new Date(start_time).toISOString(),
+        new Date(end_time).toISOString(),
+        total_minutes
+      ]
     );
 
     // Update the user's coins based on the total minutes of the session
@@ -464,8 +470,8 @@ app.get('/api/sessions', async (req, res) => {
       `SELECT 
          s.session_id,
          c.category_name AS title,
-         to_char(s.start_time, 'YYYY-MM-DD"T"HH24:MI:SS') AS start,
-         to_char(s.end_time, 'YYYY-MM-DD"T"HH24:MI:SS') AS end,
+         to_char(s.start_time AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS start,
+         to_char(s.end_time AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS end,
          c.category_color AS color,
          s.total_minutes
        FROM sessions s
@@ -496,7 +502,7 @@ app.patch('/api/sessions/:id', async (req, res) => {
         end_time = $3, 
         total_minutes = $4 
       WHERE session_id = $5`,
-      [category_id, start_time, end_time, total_minutes, id]
+      [category_id, new Date(start_time).toISOString(), new Date(end_time).toISOString(), total_minutes, id]
     );    
     res.sendStatus(200);
   } catch (err) {
