@@ -106,47 +106,40 @@
         progressBar.style.width = `${progress}%`;
     }
 
+    let sessionSaved = false;  // Flag to prevent duplicate saves
+
     function startTimer() {
         if (!window.selectedSubjectValue) {
-            // If no subject is selected, show the warning message
             subjectWarning.style.display = 'block';
-            return; // Don't start the timer if no subject is selected
+            return;
         }
 
-        // Hide the warning if a subject is selected
         subjectWarning.style.display = 'none';
 
-        // Get the hours and minutes entered by the user
-        const hours = parseInt(hoursInput.value) || 0;  // Default to 0 if not entered
+        const hours = parseInt(hoursInput.value) || 0;
         const minutes = parseInt(minutesInput.value) || 0;
 
-        // Convert the time into total seconds (easier to work with)
         totalSeconds = remainingSeconds = hours * 3600 + minutes * 60;
 
-        // If the total time is 0 or less, don't start the timer
         if (totalSeconds <= 0) return;
 
-        // Hide the setup and show the countdown
         setupView.style.display = 'none';
         countdownView.style.display = 'block';
-
-        // Update the display immediately with the initial time
         updateDisplay();
 
         sessionStartTime = new Date();
 
-        // Start a timer that updates every second
         timer = setInterval(() => {
             if (!isPaused && remainingSeconds > 0) {
                 remainingSeconds--;
                 updateDisplay();
             }
 
-            // When the timer reaches 0, stop and show the "Time's up" popup
-            if (remainingSeconds === 0) {
+            if (remainingSeconds === 0 && !sessionSaved) {
                 clearInterval(timer);
                 document.getElementById('popupOverlay').style.display = 'flex';
-                saveSessionToDatabase();  // Save the session data when the timer finishes
+                saveSessionToDatabase();  // Save the session when the timer finishes
+                sessionSaved = true;  // Set flag to true to prevent duplicate saves
             }
         }, 1000);
     }
@@ -172,26 +165,24 @@
     }
 
     function restartTimer() {
-        // Save the session before resetting the timer
-        saveSessionToDatabase(); 
+        if (!sessionSaved) {
+            saveSessionToDatabase();  // Save the session before resetting the timer
+        }
 
-        // Clear the interval to stop the current timer
         clearInterval(timer);
-
-        // Reset state
         remainingSeconds = 0;
         totalSeconds = 0;
         progressBar.style.width = '0%';
         isPaused = false;
 
-        // Reset the pause button to its initial state (pause icon)
         const pauseIcon = document.getElementById('pauseIcon');
         pauseIcon.classList.remove('bi-play-fill');
         pauseIcon.classList.add('bi-pause-fill');
 
-        // Hide the countdown view and show the setup view
         setupView.style.display = 'block';
         countdownView.style.display = 'none';
+
+        sessionSaved = false;  // Reset flag when restarting
     }
 
     // Function to save the session to the database
