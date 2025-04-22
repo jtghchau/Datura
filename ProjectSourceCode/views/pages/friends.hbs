@@ -1,187 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends</title>
-    <style>
-        body {
-            font-family: Georgia, 'Times New Roman', Times, serif, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-image: url('/images/background1.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friends</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('/images/background1.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .friends {
-            background-color: white;
-            max-width: 400px;
-            margin: 2rem auto;
-            padding: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            height: 60vh;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            /*scrolling if there are multiple friends*/
-        }
+    .friends-wrapper {
+      width: 100%;
+      max-width: 600px;
+    }
 
-        h1 {
-            text-align: center;
-            margin-top: 1rem;
-        }
+    .friends-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
 
-        /*friend user rows*/
-        .friend_users {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .friend_users span {
-            /*usernames aligned to left*/
-            flex: 1;
-            text-align: left;
-        }
-
-        /*buttons for friend actions*/
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .actions button {
-            width: 2rem;
-            height: 2rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .success-message {
-            text-align: center;
-            color: green;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            background-color: #e8f5e9;
-            border-radius: 4px;
-        }
-    </style>
-
-
-
+    .list-group-item {
+      background-color: transparent;
+    }
+  </style>
 </head>
-
 <body>
-    <h1>FRIENDS</h1>
 
-    {{!-- note: eq is the same as ==. it's saying "if === success" --}}
-    <div class="friends" id="friends_list">
-        {{#if success}}
-        {{#if (eq success 'request_sent')}}
-        <div class="success-message">Friend request sent successfully!</div>
-        {{/if}}
-        {{#if (eq success 'request_accepted')}}
-        <div class="success-message">Friend request accepted!</div>
-        {{/if}}
-        {{#if (eq success 'request_declined')}}
-        <div class="success-message">Friend request declined.</div>
-        {{/if}}
-        {{#if (eq success 'friend_removed')}}
-        <div class="success-message">Friend removed successfully.</div>
-        {{/if}}
-        {{/if}}
+  <div class="friends-wrapper">
+    <div class="card friends-card p-4">
 
-        {{#if (eq success 'Leaderboard created, friend invited')}}
-        <div class="success-message">Leaderboard created successfully!</div>
-        {{/if}}
+      <h2 class="text-center mb-4">Friends</h2>
 
-        {{#if error}}
-        <div style="text-align: center; color: red; margin-bottom: 1rem;">{{error}}</div>
-        {{/if}}
-
-
-        <form id="friend_request" action="/friends/add" method="POST"
-            style="display: flex; justify-content: center; margin-bottom: 1rem;">
-            <input type="text" name="friend_username" placeholder="Enter username" required
-                style="flex: 1; padding: 0.5rem;" />
-            <button type="submit" style="padding: 0.5rem;">Add Friend</button>
-        </form>
-
-        <h2 style="text-align: center;">Your Friends</h2>
-        {{#if friends.length}}
-        {{#each friends}}
-        <div class="friend_users">
-            <span>{{friend_name}}</span>
-
-
-            <form action="/leaderboard/invite" method="POST">
-                <input type="hidden" name="friend_username" value="{{friend_name}}" />
-                <button type="submit" class="invite-btn">Invite</button>
-            </form>
-
-
-            <form action="/friends/remove" method="POST">
-                <input type="hidden" name="friend_username" value="{{friend_name}}" />
-                <button type="submit" class="remove-btn">Remove</button>
-            </form>
+      {{#if success}}
+        <div class="alert alert-success text-center">
+          {{#if (eq success 'request_sent')}}Friend request sent successfully!{{/if}}
+          {{#if (eq success 'request_accepted')}}Friend request accepted!{{/if}}
+          {{#if (eq success 'request_declined')}}Friend request declined.{{/if}}
+          {{#if (eq success 'friend_removed')}}Friend removed successfully.{{/if}}
+          {{#if (eq success 'invite_sent')}}Leaderboard invite sent.{{/if}}
+          {{#if (eq success 'Leaderboard created, friend invited')}}Leaderboard created successfully!{{/if}}
         </div>
-        {{/each}}
-        {{else}}
-        <div style="text-align: center; color: #666;">You don't have any friends yet.</div>
-        {{/if}}
+      {{/if}}
 
-        {{#if friend_requests.length}}
-        <h2 style="text-align: center; margin-top: 1rem;">Friend Requests</h2>
-        {{#each friend_requests}}
-        <div class="friend_users">
-            <span>{{username}} wants to be your friend</span>
-            <div class="actions">
-                <form action="/friends/accept" method="POST" style="display:inline;">
-                    <input type="hidden" name="requester" value="{{username}}" />
-                    <button type="submit" style="background-color: #4CAF50; color: white;">Accept</button>
+      {{#if error}}
+        <div class="alert alert-danger text-center">{{error}}</div>
+      {{/if}}
+
+      <form class="d-flex mb-4" action="/friends/add" method="POST">
+        <input type="text" class="form-control me-2" name="friend_username" placeholder="Enter username" required />
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+
+      <h5 class="text-center">Your Friends</h5>
+      {{#if friends.length}}
+        <div class="list-group mb-4">
+          {{#each friends}}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{friend_name}}</span>
+              <div class="btn-group">
+                <form action="/leaderboard/invite" method="POST" class="me-1">
+                  <input type="hidden" name="friend_username" value="{{friend_name}}" />
+                  <button type="submit" class="btn btn-outline-primary btn-sm">Invite</button>
                 </form>
-                <form action="/friends/decline" method="POST" style="display:inline;">
-                    <input type="hidden" name="requester" value="{{username}}" />
-                    <button type="submit" style="background-color: #f44336; color: white;">Decline</button>
+                <form action="/friends/remove" method="POST">
+                  <input type="hidden" name="friend_username" value="{{friend_name}}" />
+                  <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
                 </form>
+              </div>
             </div>
+          {{/each}}
         </div>
-        {{/each}}
-        {{/if}}
+      {{else}}
+        <p class="text-center text-muted">You don't have any friends yet.</p>
+      {{/if}}
 
-        {{#if invite_requests.length}}
-        <h2>Leaderboard Invites</h2>
-        {{#each invite_requests}}
-        <div class="friend_users">
-            <span>{{from_user}} sent you an invite to “{{leaderboard_name}}”</span>
-            <div class="actions">
+      {{#if friend_requests.length}}
+        <h5 class="text-center">Friend Requests</h5>
+        <div class="list-group mb-4">
+          {{#each friend_requests}}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{username}} wants to be your friend</span>
+              <div class="btn-group">
+                <form action="/friends/accept" method="POST">
+                  <input type="hidden" name="requester" value="{{username}}" />
+                  <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                </form>
+                <form action="/friends/decline" method="POST">
+                  <input type="hidden" name="requester" value="{{username}}" />
+                  <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                </form>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+
+      {{#if invite_requests.length}}
+        <h5 class="text-center">Leaderboard Invites</h5>
+        <div class="list-group mb-4">
+          {{#each invite_requests}}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{from_user}} invited you to <strong>{{leaderboard_name}}</strong></span>
+              <div class="btn-group">
                 <form action="/leaderboard/invite/accept" method="POST">
-                    <input type="hidden" name="invite_id" value="{{invite_id}}" />
-                    <button>Accept</button>
+                  <input type="hidden" name="invite_id" value="{{invite_id}}" />
+                  <button type="submit" class="btn btn-success btn-sm">Accept</button>
                 </form>
                 <form action="/leaderboard/invite/decline" method="POST">
-                    <input type="hidden" name="invite_id" value="{{invite_id}}" />
-                    <button>Decline</button>
+                  <input type="hidden" name="invite_id" value="{{invite_id}}" />
+                  <button type="submit" class="btn btn-danger btn-sm">Decline</button>
                 </form>
+              </div>
             </div>
+          {{/each}}
         </div>
-        {{/each}}
-        {{/if}}
-    </div>
+      {{/if}}
 
-    <div style="text-align: center; margin-bottom: 1rem;">
-        <form action="/view_leaderboard" method="GET">
-            <button type="submit" style="padding: 0.5rem; background-color: #4c4caf; color: white;"> View
-                Leaderboard </button>
-        </form>
-    </div>
+      <form class="text-center mt-3" action="/view_leaderboard" method="GET">
+        <button type="submit" class="btn btn-info">View Leaderboard</button>
+      </form>
 
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
