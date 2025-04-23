@@ -1116,8 +1116,9 @@ app.get('/view_leaderboard', async (req, res) => {
 
 //route to leaderboards
 app.get('/leaderboard/:id', async (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-
+  if (!req.session.user) {
+    return res.redirect('/login'); // or res.status(401).json({ error: "Unauthorized" });
+  }
   const leaderboardId = req.params.id;
   const username = req.session.user.username;
 
@@ -1135,22 +1136,28 @@ app.get('/leaderboard/:id', async (req, res) => {
   `, [leaderboardId]);
 
   const members = await db.any(`
-    SELECT 
-      lm.username,
-      COALESCE(SUM(s.total_minutes), 0) AS time_studied
-    FROM leaderboard_members lm
-    LEFT JOIN sessions s ON s.username = lm.username
-    WHERE lm.leaderboard_id = $1
-    GROUP BY lm.username
-    ORDER BY time_studied DESC
+    SELECT username, time_studied
+    FROM leaderboard_members
+    WHERE leaderboard_id = $1
   `, [leaderboardId]);
+
+  const friends = await db.any(`
+    SELECT CASE WHEN username = $1 THEN friend_username ELSE username END AS friend_name
+    FROM friends
+    WHERE (username = $1 OR friend_username = $1) AND status = 'accepted'
+    AND NOT EXISTS (
+      SELECT 1 FROM leaderboard_members lm
+      WHERE lm.username = CASE WHEN username = $1 THEN friend_username ELSE username END
+      AND lm.leaderboard_id = $2
+    )
+  `, [username, leaderboardId]);
 
   res.render('pages/leaderboard_view', {
     leaderboard,
-    members
+    members,
+    friends 
   });
 });
-
 
 app.post('/leaderboard/:id/delete', async (req, res) => {
   if (!req.session.user) {
@@ -1264,3 +1271,39 @@ app.post('/leaderboard/create', requireLogin, async (req, res) => {
   }
 });
 
+// Invite a friend to an existing leaderboard
+app.post('/leaderboard/:id/invite', requireLogin, async (req, res) => {
+  const leaderboardId = req.params.id;
+  const fromUser = req.session.user.username;
+  const { friend_username } = req.body;
+
+  if (!friend_username) {
+    return res.redirect(`/leaderboard/${leaderboardId}?error=No username provided`);
+  }
+
+  try {
+    const alreadyInvited = await db.oneOrNone(`
+      SELECT 1 FROM leaderboard_invites
+      WHERE leaderboard_id = $1 AND to_user = $2 AND status = 'pending'
+    `, [leaderboardId, friend_username]);
+
+    const alreadyMember = await db.oneOrNone(`
+      SELECT 1 FROM leaderboard_members
+      WHERE leaderboard_id = $1 AND username = $2
+    `, [leaderboardId, friend_username]);
+
+    if (alreadyInvited || alreadyMember) {
+      return res.redirect(`/leaderboard/${leaderboardId}?error=Already invited or member`);
+    }
+
+    await db.none(`
+      INSERT INTO leaderboard_invites (leaderboard_id, from_user, to_user)
+      VALUES ($1, $2, $3)
+    `, [leaderboardId, fromUser, friend_username]);
+
+    res.redirect(`/leaderboard/${leaderboardId}?success=Invite sent`);
+  } catch (error) {
+    console.error('Error inviting friend:', error);
+    res.redirect(`/leaderboard/${leaderboardId}?error=Failed to invite`);
+  }
+});
