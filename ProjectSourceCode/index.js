@@ -69,7 +69,7 @@ app.get('/welcome', (req, res) => {
     res.json({ status: 'success', message: 'Welcome!' });
 });
 
-app.get('/settings', (req, res) => {
+app.get('/settings', requireLogin, (req, res) => {
     res.render('pages/settings');
 });
 
@@ -1081,6 +1081,10 @@ app.post('/leaderboard/invite/decline', async (req, res) => {
 
 //view leaderboard button from friends page
 app.get('/view_leaderboard', async (req, res) => {
+
+  if (!req.session.user) {
+    return res.redirect('/login'); 
+  }
   const username = req.session.user.username;
 
   const leaderboards = await db.any(`
@@ -1112,6 +1116,9 @@ app.get('/view_leaderboard', async (req, res) => {
 
 //Route to leaderboards
 app.get('/leaderboard/:id', async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login'); // or res.status(401).json({ error: "Unauthorized" });
+  }
 const leaderboardId = req.params.id;
 const username = req.session.user.username;
 
@@ -1141,6 +1148,9 @@ res.render('pages/leaderboard_view', {
 });
 
 app.post('/leaderboard/:id/delete', async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login'); // or res.status(401).json({ error: "Unauthorized" });
+  }
 const leaderboardId = req.params.id;
 const username = req.session.user.username;
 
@@ -1168,6 +1178,9 @@ try {
 });
 
 app.post('/leaderboard/:id/submit-time', requireLogin, async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login'); // or res.status(401).json({ error: "Unauthorized" });
+  }
 const leaderboardId = req.params.id;
 const username = req.session.user.username;
 const minutes = parseInt(req.body.time);
