@@ -15,17 +15,21 @@ VALUES
 
 -- Insert clothes
 INSERT INTO clothing_items (name, category, image_path, cost) VALUES
-('Bow', 'head', '../images/clothing/bow.png', 50),
-('Sunglasses', 'head', '../images/clothing/sunglasses.png', 75),
-('Glasses', 'head', '../images/clothing/glasses.png', 100),
-('Moustache', 'head', '../images/clothing/moustache.png', 150),
+('Bow', 'head', '/images/clothing/bow.png', 50),
+('Sunglasses', 'head', '/images/clothing/sunglasses.png', 75),
+('Glasses', 'head', '/images/clothing/glasses.png', 100),
+('Moustache', 'head', '/images/clothing/moustache.png', 150),
 
-('Blue Shirt', 'body', '../images/clothing/blueShirt.png', 50),
-('Pink Shirt', 'body', '../images/clothing/pinkShirt.png', 75),
-('Grey Shirt', 'body', '../images/clothing/greyShirt.png', 100),
-('Lavender Shirt', 'body', '../images/clothing/lavShirt.png', 150),
+('Blue Shirt', 'body', '/images/clothing/blueShirt.png', 50),
+('Pink Shirt', 'body', '/images/clothing/pinkShirt.png', 75),
+('Grey Shirt', 'body', '/images/clothing/greyShirt.png', 100),
+('Lavender Shirt', 'body', '/images/clothing/lavShirt.png', 150),
 
-('Pink Skirt', 'pants', '../images/clothing/pinkSkirt.png', 50),
-('Maroon Skirt', 'pants', '../images/clothing/marSkirt.png', 75),
-('Blue Skirt', 'pants', '../images/clothing/bluSkirt.png', 100),
-('Lavender Skirt', 'pants', '../images/clothing/lavSkirt.png', 150);
+('Pink Skirt', 'pants', '/images/clothing/pinkSkirt.png', 50),
+('Maroon Skirt', 'pants', '/images/clothing/marSkirt.png', 75),
+('Blue Skirt', 'pants', '/images/clothing/bluSkirt.png', 100),
+('Lavender Skirt', 'pants', '/images/clothing/lavSkirt.png', 150);
+
+-- add clothes to user inventory
+INSERT INTO user_clothing (username, item_id) VALUES
+('testuser', 1);
