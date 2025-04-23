@@ -63,6 +63,10 @@
             display: inline-block; 
         }
 
+        .home-icons a:hover {
+            background-color: white;
+        }
+
         .btn-light {
             color: white !important;
             background: none;
@@ -187,7 +191,7 @@
 
 
 
-    {{> avatar}}
+    {{> avatar equippedItems=equippedItems}}
 
     {{> timer}}
 
@@ -195,7 +199,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script type="module">
+        import { initializeAvatar, fetchUserItems } from '/js/avatar.js';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchUserItems();
+            await initializeAvatar();
+        });
+    </script>
+
     <script>
+        //updating dropdown menu selection
         document.addEventListener('DOMContentLoaded', () => {
             const subjectSpan = document.getElementById('selectedSubject');
             const dropdownMenu = document.querySelector('.custom-dropdown');

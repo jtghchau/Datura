@@ -1318,12 +1318,20 @@ app.post('/api/store/equip', async (req, res) => {
 
 //UNequip clothes
 app.post('/api/store/unequip', async (req, res) => {
+  console.log("Request body:", req.body); // for debugging
+    
   const user = req.session.user;
+  const username = user.username;
   const { category } = req.body;
 
-  if (!user || !category) return res.status(400).json({ error: 'Missing category or user' });
-
-  const username = user.username;
+  if (!user) {
+      return res.status(401).json({ error: 'Not logged in' });
+  }
+  
+  if (!category) {
+      console.log("Missing category in:", req.body);
+      return res.status(400).json({ error: 'Category is required' });
+  }
 
   try {
     // Check if the item is equipped by looking at the specific category columns
