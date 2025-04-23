@@ -49,7 +49,7 @@
         .home-icons .icon-link {
             /*color: white;*/
             background-color: rgba(255, 255, 255, 0.75);
-            padding: 7px;
+            padding: 9px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -59,8 +59,12 @@
         }
 
         .home-icons .icon-link i {
-            font-size: 24px; /* Adjust icon size if needed */
+            font-size: 1.4rem !important; /* Adjust icon size */
             display: inline-block; 
+        }
+
+        .home-icons a:hover {
+            background-color: white;
         }
 
         .btn-light {
@@ -91,18 +95,18 @@
             padding: 5px 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: space-between; /* Ensures the arrow is at the far right */
-            align-items: center; /* Vertically center the text and arrow */
+            justify-content: space-between; 
+            align-items: center; 
         }
 
         .subject-btn .dropdown-toggle::after {
-            content: '\f107'; /* Unicode for the downward arrow */
-            font-family: 'Bootstrap Icons'; /* Ensure the correct font family is used for the icon */
-            margin-left: 10px; /* Space between text and the arrow */
+            content: '\f107';
+            font-family: 'Bootstrap Icons'; 
+            margin-left: 10px; 
         }
 
         .placeholder-text {
-            color: #999; /* lighter gray for "Select Subject" */
+            color: #999; 
         }
 
         .custom-dropdown {
@@ -178,16 +182,16 @@
     <!-- Icons -->
     <div class="home-icons d-flex flex-column align-items-center p-3">
         <a class="icon-link" href="#" id="showStickyNoteBtn">
-            <i class="bi bi-journal-bookmark-fill fs-5" style="color: rgb(91, 91, 91);"></i>
+            <i class="bi bi-journal-bookmark-fill fs-5" style="color: rgb(108, 111, 107);"></i>
         </a>
         <a class="icon-link" href="/store">
-            <i class="bi bi-handbag-fill fs-5" style="color: rgb(255, 132, 228);"></i>
+            <i class="bi bi-handbag-fill fs-5" style="color: #ff5cdc;"></i>
         </a>
     </div>
 
 
 
-    {{> avatar}}
+    {{> avatar equippedItems=equippedItems}}
 
     {{> timer}}
 
@@ -195,7 +199,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script type="module">
+        import { initializeAvatar, fetchUserItems } from '/js/avatar.js';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchUserItems();
+            await initializeAvatar();
+        });
+    </script>
+
     <script>
+        //updating dropdown menu selection
         document.addEventListener('DOMContentLoaded', () => {
             const subjectSpan = document.getElementById('selectedSubject');
             const dropdownMenu = document.querySelector('.custom-dropdown');
