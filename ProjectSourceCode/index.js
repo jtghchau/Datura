@@ -1081,23 +1081,33 @@ app.post('/leaderboard/invite/decline', async (req, res) => {
 
 //view leaderboard button from friends page
 app.get('/view_leaderboard', async (req, res) => {
-const username = req.session.user.username;
+  const username = req.session.user.username;
 
-const leaderboards = await db.any(`
-  SELECT lb.leaderboard_id AS id, lb.name
-  FROM leaderboard_members lbm
-  JOIN leaderboards lb ON lb.leaderboard_id = lbm.leaderboard_id
-  WHERE lbm.username = $1
-`, [username]);
+  const leaderboards = await db.any(`
+    SELECT lb.leaderboard_id AS id, lb.name
+    FROM leaderboard_members lbm
+    JOIN leaderboards lb ON lb.leaderboard_id = lbm.leaderboard_id
+    WHERE lbm.username = $1
+  `, [username]);
 
-const invite_requests = await db.any(`
-  SELECT li.invite_id, li.from_user, lb.name AS leaderboard_name
-  FROM leaderboard_invites li
-  JOIN leaderboards lb ON li.leaderboard_id = lb.leaderboard_id
-  WHERE li.to_user = $1 AND li.status = 'pending'
-`, [username]);
+  const invite_requests = await db.any(`
+    SELECT li.invite_id, li.from_user, lb.name AS leaderboard_name
+    FROM leaderboard_invites li
+    JOIN leaderboards lb ON li.leaderboard_id = lb.leaderboard_id
+    WHERE li.to_user = $1 AND li.status = 'pending'
+  `, [username]);
 
-res.render('pages/leaderboard', { leaderboards, invite_requests });
+  const friends = await db.any(`
+    SELECT CASE WHEN username = $1 THEN friend_username ELSE username END as friend_name
+    FROM friends
+    WHERE (username = $1 OR friend_username = $1) AND status = 'accepted'
+  `, [username]);
+
+  res.render('pages/leaderboard', {
+    leaderboards,
+    invite_requests,
+    friends
+  });
 });
 
 //Route to leaderboards
@@ -1176,4 +1186,63 @@ try {
 }
 });
 
+// GET: Create Leaderboard Page
+app.get('/leaderboard/create', requireLogin, async (req, res) => {
+  try {
+    const friends = await db.any(`
+      SELECT CASE WHEN username = $1 THEN friend_username ELSE username END as friend_name
+      FROM friends
+      WHERE (username = $1 OR friend_username = $1) AND status = 'accepted'
+    `, [req.session.user.username]);
+
+    const leaderboards = await db.any(`
+      SELECT lb.leaderboard_id AS id, lb.name
+      FROM leaderboard_members lbm
+      JOIN leaderboards lb ON lb.leaderboard_id = lbm.leaderboard_id
+      WHERE lbm.username = $1
+    `, [req.session.user.username]);
+
+    const invite_requests = await db.any(`
+      SELECT li.invite_id, li.from_user, lb.name AS leaderboard_name
+      FROM leaderboard_invites li
+      JOIN leaderboards lb ON li.leaderboard_id = lb.leaderboard_id
+      WHERE li.to_user = $1 AND li.status = 'pending'
+    `, [req.session.user.username]);
+
+    res.render('pages/leaderboard', { leaderboards, invite_requests, friends });
+  } catch (err) {
+    console.error('Error loading create leaderboard page:', err);
+    res.redirect('/view_leaderboard?error=Failed to load');
+  }
+});
+
+// POST: Create Leaderboard
+app.post('/leaderboard/create', requireLogin, async (req, res) => {
+  const { name, invited_friends } = req.body;
+  const invited = Array.isArray(invited_friends) ? invited_friends : (invited_friends ? [invited_friends] : []);
+
+  try {
+    const leaderboard = await db.one(
+      `INSERT INTO leaderboards (name, created_by) VALUES ($1, $2) RETURNING leaderboard_id`,
+      [name, req.session.user.username]
+    );
+
+    await db.none(
+      `INSERT INTO leaderboard_members (leaderboard_id, username) VALUES ($1, $2)`,
+      [leaderboard.leaderboard_id, req.session.user.username]
+    );
+
+    for (const friend of invited) {
+      await db.none(`
+        INSERT INTO leaderboard_invites (leaderboard_id, from_user, to_user)
+        VALUES ($1, $2, $3)
+      `, [leaderboard.leaderboard_id, req.session.user.username, friend]);
+    }
+
+    res.redirect('/view_leaderboard');
+  } catch (error) {
+    console.error('Error creating leaderboard:', error);
+    res.redirect('/view_leaderboard?error=Could not create leaderboard');
+  }
+});
 
