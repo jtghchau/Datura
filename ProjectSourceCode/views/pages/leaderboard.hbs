@@ -20,7 +20,7 @@
 
     .leaderboard-wrapper {
       width: 80%;
-      max-width: 900px;
+      max-width: 600px;
       margin: 0 auto;
       background: white;
       border-radius: 10px;
@@ -88,15 +88,32 @@
       <input type="text" name="name" placeholder="Leaderboard Name" class="form-control" required>
     </div>
 
-    <div class="mb-3">
-      <label>Select Friends to Invite:</label>
-      {{#each friends}}
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="invited_friends" value="{{friend_name}}" id="invite-{{@index}}">
-          <label class="form-check-label" for="invite-{{@index}}">{{friend_name}}</label>
+      <button type="button" class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#friendModal">
+        Select Friends to Invite
+      </button>
+
+      <div class="modal fade" id="friendModal" tabindex="-1" aria-labelledby="friendModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="friendModalLabel">Invite Friends</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              {{#each friends}}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="invited_friends" value="{{friend_name}}" id="modal-invite-{{@index}}">
+                  <label class="form-check-label" for="modal-invite-{{@index}}">{{friend_name}}</label>
+                </div>
+              {{/each}}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+            </div>
+          </div>
         </div>
-      {{/each}}
-    </div>
+      </div>
+
 
     <button type="submit" class="btn btn-success">Create Leaderboard</button>
   </form>
