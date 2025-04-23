@@ -18,7 +18,8 @@
             margin: 0; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             text-align: center;
-            flex: 0 1 auto; /* Allows container to grow but not shrink */
+            flex: 0 1 auto;
+            margin-right: 330px;
         }
 
         .store-head {
@@ -165,25 +166,20 @@
 
         .store-avatar-wrapper {
             display: flex;
-            justify-content: center; 
-            align-items: flex-start; 
-            gap: 60px; /* Space between store and avatar */
-            max-width: 1100px; 
-            margin: 0 auto; 
+            justify-content: center;
+            max-width: 1100px;
+            margin: 0 auto;
             padding: 20px;
             position: relative;
         }
 
-        /* Update avatar container positioning */
         .avatar-container {
-            position: sticky;
-            top: 100px; /* Adjust based on your header height */
+            position: fixed;
+            bottom: 35%;
+            right: calc(50% - 530px); 
             width: 270px;
             height: 407px;
-            margin: 0; /* Remove previous absolute positioning */
-            transform: none; /* Remove previous transform */
-            left: auto;
-            bottom: auto;
+            z-index: 10;
         }
 
     </style>
