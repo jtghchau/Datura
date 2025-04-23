@@ -1142,14 +1142,15 @@ app.get('/leaderboard/:id', async (req, res) => {
   `, [leaderboardId]);
 
   const friends = await db.any(`
-    SELECT CASE WHEN username = $1 THEN friend_username ELSE username END AS friend_name
-    FROM friends
-    WHERE (username = $1 OR friend_username = $1) AND status = 'accepted'
-    AND NOT EXISTS (
-      SELECT 1 FROM leaderboard_members lm
-      WHERE lm.username = CASE WHEN username = $1 THEN friend_username ELSE username END
+    SELECT 
+      CASE WHEN f.username = $1 THEN f.friend_username ELSE f.username END AS friend_name
+    FROM friends f
+    LEFT JOIN leaderboard_members lm ON 
+      lm.username = CASE WHEN f.username = $1 THEN f.friend_username ELSE f.username END
       AND lm.leaderboard_id = $2
-    )
+    WHERE (f.username = $1 OR f.friend_username = $1)
+    AND f.status = 'accepted'
+    AND lm.username IS NULL
   `, [username, leaderboardId]);
 
   res.render('pages/leaderboard_view', {
