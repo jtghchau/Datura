@@ -1114,38 +1114,43 @@ app.get('/view_leaderboard', async (req, res) => {
   });
 });
 
-//Route to leaderboards
+//route to leaderboards
 app.get('/leaderboard/:id', async (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/login'); // or res.status(401).json({ error: "Unauthorized" });
+  if (!req.session.user) return res.redirect('/login');
+
+  const leaderboardId = req.params.id;
+  const username = req.session.user.username;
+
+  const member = await db.oneOrNone(`
+    SELECT * FROM leaderboard_members
+    WHERE leaderboard_id = $1 AND username = $2
+  `, [leaderboardId, username]);
+
+  if (!member) {
+    return res.status(403).send("You're not in this leaderboard.");
   }
-const leaderboardId = req.params.id;
-const username = req.session.user.username;
 
-const member = await db.oneOrNone(`
-  SELECT * FROM leaderboard_members
-  WHERE leaderboard_id = $1 AND username = $2
-`, [leaderboardId, username]);
+  const leaderboard = await db.one(`
+    SELECT * FROM leaderboards WHERE leaderboard_id = $1
+  `, [leaderboardId]);
 
-if (!member) {
-  return res.status(403).send("You're not in this leaderboard.");
-}
+  const members = await db.any(`
+    SELECT 
+      lm.username,
+      COALESCE(SUM(s.total_minutes), 0) AS time_studied
+    FROM leaderboard_members lm
+    LEFT JOIN sessions s ON s.username = lm.username
+    WHERE lm.leaderboard_id = $1
+    GROUP BY lm.username
+    ORDER BY time_studied DESC
+  `, [leaderboardId]);
 
-const leaderboard = await db.one(`
-  SELECT * FROM leaderboards WHERE leaderboard_id = $1
-`, [leaderboardId]);
-
-const members = await db.any(`
-  SELECT username, time_studied
-  FROM leaderboard_members
-  WHERE leaderboard_id = $1
-`, [leaderboardId]);
-
-res.render('pages/leaderboard_view', {
-  leaderboard,
-  members
+  res.render('pages/leaderboard_view', {
+    leaderboard,
+    members
+  });
 });
-});
+
 
 app.post('/leaderboard/:id/delete', async (req, res) => {
   if (!req.session.user) {
