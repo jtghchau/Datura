@@ -3,89 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>home</title>
+    <title>store</title>
 
     <style>
-        body {
-            background-image: url('/images/background1.png');
-            background-size: cover;  
-            background-position: center; 
-            background-attachment: fixed;
-            height: 100vh;
-        }
-
-        .coin-box {
-            display: flex;
-            background-color: white;
-            padding: 5px 10px;
-            border-radius: 25px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .coin-box img {
-            width: 24px; /* Adjust size of the coin image */
-            height: 24px; /* Adjust size of the coin image */
-            margin-right: 4px; /* Space between image and text */
-        }
-
-        .home-icons {
-            gap: 7px;
-            padding-top: 0px !important;
-        }
-
-        .home-icons .icon-link {
-            /*color: white;*/
-            background-color: rgba(255, 255, 255, 0.75);
-            padding: 7px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Vertically center the icon */
-            line-height: 1; 
-            margin-right: auto;
-        }
-
-        .home-icons .icon-link i {
-            font-size: 24px; /* Adjust icon size if needed */
-            display: inline-block; 
+        h1 {
+            color: white;;
         }
 
         .store-container {
             background-color: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 25px;
-            max-width: 900px;
-            margin: 30px auto;
+            width: fit-content;
+            margin: 0; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            flex: 0 1 auto; /* Allows container to grow but not shrink */
         }
 
-        .category-tabs {
+        .store-head {
+            position: relative;
             display: flex;
-            justify-content: center;
+            align-items: center;
+            justify-content: center; /* center tabs container */
             margin-bottom: 20px;
         }
 
+        /* Back arrow */
+        .store-head a {
+            font-size: 2.5rem !important;
+            font-weight: bold;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            left: 0;
+            top: 15%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #445368;
+        }
+
+        /* Tabs are naturally centered by flex + margin auto */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            background-color: aqua;
+            border-radius: 8px;
+            overflow: hidden;
+            width: fit-content;
+            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .tab-button {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 20px;
+            font-size: 1rem;
+            background-color: #dfe6ef;
+            /*border: 1px solid #3f4e62;*/
+            border: none;
+            color: #445368;
             padding: 8px 18px;
-            margin: 0 10px;
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         .tab-button.active,
         .tab-button:hover {
-            background-color: #25a029;
+            background-color: #64a2ce;
             color: white;
-            border-color: #25a029;
+            border-color: #6cb4e7;
         }
+        
 
         .items-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(4, 150px); /* exactly 4 items per row */
             gap: 16px;
+            justify-content: center; /* centers the entire grid horizontally */
         }
+
 
         .item-card {
             background-color: white;
@@ -109,141 +107,392 @@
             vertical-align: middle;
         }
 
+        /* Button Base Styles */
+        .buy-btn, .equip-btn, .unequip-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-top: 8px;
+        width: 85px; 
+        display: inline-block;
+        text-align: center;
+        font-family: inherit; 
+        }
+
+        .buy-btn {
+        background-color: #4285f4;
+        color: white;
+        font-size: 0.9rem;
+        }
+
+        .equip-btn {
+        background-color: #34a853;
+        color: white;
+        font-size: 0.9rem;
+        }
+
+        .unequip-btn {
+        background-color: #2d9248;
+        color: white;
+        font-size: 0.8rem; /* Specifically smaller font */
+        padding: 8px 10px; 
+        }
+
+        /* Hover States */
+        .buy-btn:hover { 
+            background-color: #3367d6; 
+            transform: translateY(-1px); 
+        }
+        .equip-btn:hover { 
+            background-color: #2d9248; 
+            transform: translateY(-1px); 
+        }
+        .unequip-btn:hover { 
+            background-color: #247c3c; 
+            transform: translateY(-1px); 
+        }
+
+        /* Active States */
+        .buy-btn:active, .equip-btn:active, .unequip-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .store-avatar-wrapper {
+            display: flex;
+            justify-content: center; 
+            align-items: flex-start; 
+            gap: 60px; /* Space between store and avatar */
+            max-width: 1100px; 
+            margin: 0 auto; 
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Update avatar container positioning */
+        .avatar-container {
+            position: sticky;
+            top: 100px; /* Adjust based on your header height */
+            width: 270px;
+            height: 407px;
+            margin: 0; /* Remove previous absolute positioning */
+            transform: none; /* Remove previous transform */
+            left: auto;
+            bottom: auto;
+        }
+
     </style>
 
 </head>
 
 <body>
-    <div class="store-container">
-        <h2>Clothing Store</h2>
-        <div class="coin-box">
-            <img src="/images/coin.png" alt="Coin">
-            <span>{{coins}}</span>
-        </div>
-
-        <div class="category-tabs">
-            <button class="tab-button active" data-category="head">Head</button>
-            <button class="tab-button" data-category="body">Body</button>
-            <button class="tab-button" data-category="pants">Pants</button>
-        </div>
-
-        <div class="items-grid" id="itemsGrid">
-        </div>
+    <div class="container-fluid d-flex justify-content-between align-items-center p-3">
+        {{> coins}}
     </div>
-</body>
-
-<script>
-    coins = 1000
-    const items = [
-        { id: 'hat1', name: 'Bow', category: 'head', image: '/images/clothing/bow.png', price: 50 },
-        { id: 'hat2', name: 'Sunglasses', category: 'head', image: '/images/clothing/sunglasses.png', price: 75 },
-        { id: 'hat3', name: 'Glasses', category: 'head', image: '/images/clothing/glasses.png', price: 100 },
-        { id: 'hat4', name: 'Moustache', category: 'head', image: '/images/clothing/moustache.png', price: 150 },
-        { id: 'shirt1', name: 'Blue Shirt', category: 'body', image: '/images/clothing/blueShirt.png', price: 50 },
-        { id: 'shirt2', name: 'Pink Shirt', category: 'body', image: '/images/clothing/pinkShirt.png', price: 75 },
-        { id: 'shirt3', name: 'Grey Shirt', category: 'body', image: '/images/clothing/greyShirt.png', price: 100 },
-        { id: 'shirt4', name: 'Lavender Shirt', category: 'body', image: '/images/clothing/lavShirt.png', price: 150 },
-        { id: 'pants1', name: 'Pink Skirt', category: 'pants', image: '/images/clothing/pinkSkirt.png', price: 50 },
-        { id: 'pants2', name: 'Maroon Skirt', category: 'pants', image: '/images/clothing/marSkirt.png', price: 75 },
-        { id: 'pants3', name: 'Blue Skirt', category: 'pants', image: '/images/clothing/bluSkirt.png', price: 100 },
-        { id: 'pants4', name: 'Lavender Skirt', category: 'pants', image: '/images/clothing/lavSkirt.png', price: 150 }
-    ];
-
-    let ownedItems = new Set();
-    let equippedItems = {
-        head: null,
-        body: null,
-        pants: null
-    };
-
-    function renderItems(category) {
-        const container = document.getElementById('itemsGrid');
-        container.innerHTML = '';
-
-        items.filter(item => item.category === category).forEach(item => {
-            const isOwned = ownedItems.has(item.id);
-            const isEquipped = equippedItems[item.category] === item.id;
-
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            card.innerHTML = `
-                <img src="${item.image}" alt="${item.name}">
-                <div class="item-info">
-                    <p>${item.name}</p>
-                    <p><img src="/images/coin.png" class="coin-icon"> ${item.price}</p>
-                    <button class="buy-btn" ${isOwned ? 'style="display:none;"' : ''}>Buy</button>
-                    <button class="equip-btn" ${!isOwned || isEquipped ? 'style="display:none;"' : ''}>Equip</button>
-                    <button class="unequip-btn" ${isEquipped ? '' : 'style="display:none;"'}>Unequip</button>
+    <h1 class="text-center fw-bold">Store</h1>
+    <div class = "store-avatar-wrapper">
+        <div class="store-container">
+            <div class="store-head">
+                <a href="/home">
+                    <i class="bi bi-arrow-left-short"></i>
+                </a>
+                <div class="category-tabs">
+                    <button class="tab-button active" data-category="head">Head</button>
+                    <button class="tab-button" data-category="body">Body</button>
+                    <button class="tab-button" data-category="pants">Pants</button>
                 </div>
-            `;
+            </div>
+            <div class="items-grid" id="itemsGrid"></div>
+        </div>
+        {{> avatar equippedItems=equippedItems}}
+    </div>
 
-            const buyBtn = card.querySelector('.buy-btn');
-            const equipBtn = card.querySelector('.equip-btn');
-            const unequipBtn = card.querySelector('.unequip-btn');
+    <script>
+        let coins = 0; // fetched
+        let ownedItems = new Set();
+        let equippedItems = {
+            head: null,
+            body: null,
+            pants: null
+        };
+        let items = [];
+        let allItems = []; //all items in all categories
+        let userId = '{{user.username}}'; // Inject the user ID from the server-side template
 
-            if (buyBtn) {
-                buyBtn.addEventListener('click', () => {
-                    if (coins >= item.price) {
-                        coins -= item.price;
-                        ownedItems.add(item.id);
-                        updateCoinsDisplay();
-                        renderItems(category);
-                    } else {
-                        alert('Not enough coins!');
-                    }
-                });
+        async function initializeStore() {
+            const categories = ['head', 'body', 'pants'];
+            const promises = categories.map(cat => fetch(`/api/store/${cat}`));
+            
+            const responses = await Promise.all(promises);
+            const categoryItems = await Promise.all(responses.map(r => r.json()));
+            
+            // Ensure category is preserved
+            allItems = categoryItems.flatMap((categoryGroup, i) => 
+                categoryGroup.map(item => ({
+                    id: item.item_id,
+                    name: item.name,
+                    image: item.image_path,
+                    price: item.cost,
+                    category: categories[i] // Use the category from the endpoint
+                }))
+            );
+            
+            updateAvatar();
+        }
+
+        // Fetch clothing items available for sale
+        async function fetchItems(category) {
+            try {
+                const response = await fetch(`/api/store/${category}`);
+                if (!response.ok) throw new Error('Failed to fetch items');
+                const rawItems = await response.json();
+
+                const mappedItems = rawItems.map(item => ({
+                    id: item.item_id,
+                    name: item.name,
+                    image: item.image_path,
+                    price: item.cost,
+                    category: item.category || category // Fallback to the requested category
+                }));
+
+                console.log("Raw items from API:", rawItems);
+                console.log("Requested category:", category);
+
+                renderItems(mappedItems, category);
+            } catch (error) {
+                console.error('Error fetching items:', error);
             }
+        }
 
-            if (equipBtn) {
-                equipBtn.addEventListener('click', () => {
-                    equippedItems[item.category] = item.id;
-                    renderItems(category);
-                    updateAvatar();
-                });
-            }
+        // Fetch owned items and equipped items from the server
+        async function fetchUserItems() {
+            const response = await fetch('/api/user/items');
+            const data = await response.json();
+            ownedItems = new Set(data.owned);
+            equippedItems = data.equipped;
+            updateAvatar();
+        }
 
-            if (unequipBtn) {
-                unequipBtn.addEventListener('click', () => {
-                    equippedItems[item.category] = null;
-                    renderItems(category);
-                    updateAvatar();
-                });
-            }
+        // Render items for the selected category
+        function renderItems(newItems, category) {
+            console.log('Rendering items:', newItems);
 
-            container.appendChild(card);
-        });
-    }
+            items = newItems;
+            const container = document.getElementById('itemsGrid');
+            container.innerHTML = '';
 
-    document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderItems(btn.dataset.category);
-        });
-    });
+            items.forEach(item => {
+                const isOwned = ownedItems.has(item.id);
+                const isEquipped = equippedItems[item.category] === item.id;
 
-    function updateCoinsDisplay() {
-        document.querySelector('.coin-box span').textContent = coins;
-    }
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="item-info">
+                        <p>${item.name}</p>
+                        <p><img src="/images/coin.png" class="coin-icon"> ${item.price}</p>
+                        <button class="buy-btn" ${isOwned ? 'style="display:none;"' : ''}>Buy</button>
+                        <button class="equip-btn" ${!isOwned || isEquipped ? 'style="display:none;"' : ''}>Equip</button>
+                        <button class="unequip-btn" ${isEquipped ? '' : 'style="display:none;"'}>Unequip</button>
+                    </div>
+                `;
 
-    function updateAvatar() {
-        const avatarContainer = document.querySelector('.avatar-container');
-        const layers = avatarContainer.querySelectorAll('.avatar-layer:not(.base-avatar):not(.avatar-shadow)');
-        layers.forEach(layer => layer.remove());
+                const buyBtn = card.querySelector('.buy-btn');
+                const equipBtn = card.querySelector('.equip-btn');
+                const unequipBtn = card.querySelector('.unequip-btn');
 
-        Object.values(equippedItems).forEach(id => {
-            if (id) {
-                const item = items.find(it => it.id === id);
-                if (item) {
-                    const img = document.createElement('img');
-                    img.src = item.image;
-                    img.className = 'avatar-layer';
-                    avatarContainer.appendChild(img);
+                if (buyBtn) {
+                    buyBtn.addEventListener('click', async () => {
+                        try {
+                            const result = await buyItem(item.id);
+                            if (result.success) {
+                                ownedItems.add(item.id);
+                                renderItems(items, category);
+                            }
+                        } catch (error) {
+                            console.error('Buy failed:', error);
+                        }
+                    });
                 }
+
+                if (equipBtn) {
+                    equipBtn.addEventListener('click', async () => {
+                        try {
+                            const result = await equipItem(item.id);
+                            if (result.success) {
+                                equippedItems[item.category] = item.id;
+                                renderItems(items, category);
+                                updateAvatar();
+                            }
+                        } catch (error) {
+                            console.error('Equip failed:', error);
+                        }
+                    });
+                }
+
+                if (unequipBtn) {
+                    unequipBtn.addEventListener('click', async () => {
+                     console.log("Item being unequipped:", item); // Debug log
+                     if (!item.category) {
+                        console.error("Cannot unequip - item has no category:", item);
+                        return;
+                    }
+                        try {
+                            const result = await unequipItem(item.category); 
+                            if (result.success) {
+                                equippedItems[item.category] = null;
+                                renderItems(items, category);
+                                updateAvatar();
+                            }
+                        } catch (error) {
+                            console.error('Unequip failed:', error);
+                        }
+                    });
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function updateCoinsDisplay() {
+            document.querySelector('.coin-box span').textContent = coins;
+        }
+
+        function updateAvatar() {
+            const clothingContainer = document.querySelector('.clothing-layers');
+            clothingContainer.innerHTML = '';
+
+            Object.entries(equippedItems).forEach(([category, id]) => {
+                if (id) {
+                    const item = allItems.find(it => it.id === id);
+                    if (item) {
+                        const img = new Image();
+                        img.src = item.image;
+                        img.className = 'clothing-layer';
+                        img.style.position = 'absolute'; // Explicit positioning
+                        
+                        img.onload = () => {
+                            console.log(`Image loaded: ${img.src} (${img.naturalWidth}x${img.naturalHeight})`);
+                            clothingContainer.appendChild(img);
+                        };
+                        
+                        img.onerror = () => console.error("Failed to load:", item.image);
+                    }
+                }
+            });
+        }
+
+        async function buyItem(itemId) {
+            try {
+                const response = await fetch('/api/store/buy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_id: itemId }) 
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Buy failed');
+                }
+
+                const data = await response.json();
+                coins = data.coins; // Update coins 
+                updateCoinsDisplay();
+                return data;
+            } catch (error) {
+                console.error('Buy error:', error);
+                alert(error.message);
+                return { error: error.message };
             }
+        }
+
+        async function equipItem(itemId) { 
+            try {
+                const response = await fetch('/api/store/equip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_id: itemId }) 
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Equip failed');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Equip error:', error);
+                alert(error.message);
+                return { error: error.message };
+            }
+        }
+
+        async function unequipItem(category) {
+            try {
+                console.log("Attempting to unequip:", category);
+                
+                // Debug: Check the payload before sending
+                const payload = { category: category };
+                console.log("Payload being sent:", payload);
+
+                const response = await fetch('/api/store/unequip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload) // Clean payload without embedded console.log
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Unequip failed');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Unequip error:', error);
+                alert(error.message);
+                return { error: error.message };
+            }
+        }
+
+        async function fetchCoinBalance() {
+            const response = await fetch('/store');
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const coinElement = doc.querySelector('.coin-box span');
+            if (coinElement) {
+                coins = parseInt(coinElement.textContent) || 0;
+                updateCoinsDisplay();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchCoinBalance();
+            await fetchUserItems();
+            await initializeStore(); 
+            fetchItems('head'); 
         });
-    }
-</script>
+
+
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                fetchItems(btn.dataset.category);
+            });
+        });
+    </script>
+
+
+</body>
 
 </html>
 
