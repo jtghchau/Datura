@@ -58,6 +58,8 @@
     let remainingSeconds = 0;
     let isPaused = false;
     let sessionStartTime;
+    const TIMER_STATE_KEY = 'studyTimerState';
+
 
     const setupView = document.getElementById('timerSetup');
     const countdownView = document.getElementById('timerCountdown');
@@ -92,6 +94,33 @@
                 localStorage.removeItem('selectedSubjectValue');
                 window.selectedSubjectId = null;
                 window.selectedSubjectValue = null;
+            }
+        }
+        
+        // Restore timer state if available
+        restoreTimerState();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && timer) {
+            // When coming back to the page, recalculate remaining time
+            const savedState = localStorage.getItem(TIMER_STATE_KEY);
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                if (!state.isPaused && state.remainingSeconds > 0) {
+                    const elapsedSeconds = Math.floor((new Date() - new Date(state.sessionStartTime)) / 1000);
+                    remainingSeconds = Math.max(0, state.totalSeconds - elapsedSeconds);
+                    updateDisplay();
+                    saveTimerState();
+                    
+                    if (remainingSeconds === 0) {
+                        clearInterval(timer);
+                        document.getElementById('popupOverlay').style.display = 'flex';
+                        saveSessionToDatabase();
+                        sessionSaved = true;
+                        clearTimerState();
+                    }
+                }
             }
         }
     });
@@ -133,20 +162,111 @@
         updateDisplay();
 
         sessionStartTime = new Date();
+        
+        // Save initial timer state
+        saveTimerState();
 
         timer = setInterval(() => {
             if (!isPaused && remainingSeconds > 0) {
                 remainingSeconds--;
                 updateDisplay();
+                saveTimerState(); // Save state every second
             }
 
             if (remainingSeconds === 0 && !sessionSaved) {
                 clearInterval(timer);
                 document.getElementById('popupOverlay').style.display = 'flex';
-                saveSessionToDatabase();  // Save the session when the timer finishes
-                sessionSaved = true;  // Set flag to true to prevent duplicate saves
+                saveSessionToDatabase();
+                sessionSaved = true;
+                clearTimerState(); // Clear saved state when timer completes
             }
         }, 1000);
+    }
+
+    function saveTimerState() {
+        const timerState = {
+            totalSeconds,
+            remainingSeconds,
+            isPaused,
+            sessionStartTime: sessionStartTime.toISOString(),
+            sessionSaved
+        };
+        localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(timerState));
+    }
+
+    function clearTimerState() {
+        localStorage.removeItem(TIMER_STATE_KEY);
+    }
+
+    function restoreTimerState() {
+        const savedState = localStorage.getItem(TIMER_STATE_KEY);
+        if (!savedState) return false;
+
+        try {
+            const state = JSON.parse(savedState);
+            
+            // Don't calculate elapsed time if timer was paused
+            if (!state.isPaused && state.remainingSeconds > 0) {
+                const elapsedSeconds = Math.floor((new Date() - new Date(state.sessionStartTime)) / 1000);
+                state.remainingSeconds = Math.max(0, state.totalSeconds - elapsedSeconds);
+                
+                if (state.remainingSeconds === 0) {
+                    // Timer should have completed while away
+                    clearTimerState();
+                    return false;
+                }
+            }
+
+            totalSeconds = state.totalSeconds;
+            remainingSeconds = state.remainingSeconds;
+            isPaused = state.isPaused;
+            sessionStartTime = new Date(state.sessionStartTime);
+            sessionSaved = state.sessionSaved;
+
+            if (remainingSeconds > 0) {
+                setupView.style.display = 'none';
+                countdownView.style.display = 'block';
+                updateDisplay();
+                
+                // Update pause button icon
+                const pauseIcon = document.getElementById('pauseIcon');
+                if (isPaused) {
+                    pauseIcon.classList.remove('bi-pause-fill');
+                    pauseIcon.classList.add('bi-play-fill');
+                    
+                    // Don't start the interval if timer was paused
+                    timer = null;
+                } else {
+                    pauseIcon.classList.remove('bi-play-fill');
+                    pauseIcon.classList.add('bi-pause-fill');
+                    
+                    // Restart the timer interval if needed
+                    if (!timer) {
+                        timer = setInterval(() => {
+                            if (!isPaused && remainingSeconds > 0) {
+                                remainingSeconds--;
+                                updateDisplay();
+                                saveTimerState();
+                            }
+
+                            if (remainingSeconds === 0 && !sessionSaved) {
+                                clearInterval(timer);
+                                document.getElementById('popupOverlay').style.display = 'flex';
+                                saveSessionToDatabase();
+                                sessionSaved = true;
+                                clearTimerState();
+                            }
+                        }, 1000);
+                    }
+                }
+                
+                return true;
+            }
+        } catch (e) {
+            console.error('Error restoring timer state:', e);
+            clearTimerState();
+        }
+        return false;
     }
 
     document.getElementById('closePopupBtn').addEventListener('click', () => {
@@ -168,29 +288,52 @@
         const pauseIcon = document.getElementById('pauseIcon');
 
         if (isPaused) {
-            // Change icon to 'play' when paused
             pauseIcon.classList.remove('bi-pause-fill');
             pauseIcon.classList.add('bi-play-fill');
+            
+            clearInterval(timer);
+            timer = null;
         } else {
-            // Change icon to 'pause' when resumed
             pauseIcon.classList.remove('bi-play-fill');
             pauseIcon.classList.add('bi-pause-fill');
+            
+            // Restart the interval when unpaused
+            if (!timer) {
+                timer = setInterval(() => {
+                    if (!isPaused && remainingSeconds > 0) {
+                        remainingSeconds--;
+                        updateDisplay();
+                        saveTimerState();
+                    }
+
+                    if (remainingSeconds === 0 && !sessionSaved) {
+                        clearInterval(timer);
+                        document.getElementById('popupOverlay').style.display = 'flex';
+                        saveSessionToDatabase();
+                        sessionSaved = true;
+                        clearTimerState();
+                    }
+                }, 1000);
+            }
         }
+        
+        // Save the state immediately when pausing/unpausing
+        saveTimerState();
     }
+
 
     function restartTimer() {
         if (!sessionSaved) {
-            saveSessionToDatabase();  // Save session before restarting if not saved
+            saveSessionToDatabase();
         }
 
-        // Reset session flag when restarting
-        sessionSaved = false;  // Reset flag to allow saving a new session if necessary
-
         clearInterval(timer);
+        timer = null;
         remainingSeconds = 0;
         totalSeconds = 0;
         progressBar.style.width = '0%';
         isPaused = false;
+        sessionSaved = false;
 
         const pauseIcon = document.getElementById('pauseIcon');
         pauseIcon.classList.remove('bi-play-fill');
@@ -198,9 +341,9 @@
 
         setupView.style.display = 'block';
         countdownView.style.display = 'none';
-
-        // Ensure the popup doesn't show up when restarting
         document.getElementById('popupOverlay').style.display = 'none';
+        
+        clearTimerState();
     }
 
 
