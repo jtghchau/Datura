@@ -407,7 +407,7 @@
                 return data;
             } catch (error) {
                 console.error('Buy error:', error);
-                alert(error.message);
+                // alert(error.message); 
                 return { error: error.message };
             }
         }
@@ -428,7 +428,7 @@
                 return await response.json();
             } catch (error) {
                 console.error('Equip error:', error);
-                alert(error.message);
+                // alert(error.message);
                 return { error: error.message };
             }
         }
@@ -457,7 +457,7 @@
                 return await response.json();
             } catch (error) {
                 console.error('Unequip error:', error);
-                alert(error.message);
+                // alert(error.message);
                 return { error: error.message };
             }
         }
