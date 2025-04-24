@@ -1274,39 +1274,39 @@ app.post('/leaderboard/create', requireLogin, async (req, res) => {
 app.post('/leaderboard/:id/invite', requireLogin, async (req, res) => {
   const leaderboardId = req.params.id;
   const fromUser = req.session.user.username;
-  const { friend_username } = req.body;
-
-  if (!friend_username) {
-    return res.redirect(`/leaderboard/${leaderboardId}?error=No username provided`);
-  }
+  const invited = Array.isArray(req.body.invited_friends)
+    ? req.body.invited_friends
+    : req.body.invited_friends
+    ? [req.body.invited_friends]
+    : [];
 
   try {
-    const alreadyInvited = await db.oneOrNone(`
-      SELECT 1 FROM leaderboard_invites
-      WHERE leaderboard_id = $1 AND to_user = $2 AND status = 'pending'
-    `, [leaderboardId, friend_username]);
+    for (const friend of invited) {
+      const alreadyInvited = await db.oneOrNone(`
+        SELECT 1 FROM leaderboard_invites
+        WHERE leaderboard_id = $1 AND to_user = $2 AND status = 'pending'
+      `, [leaderboardId, friend]);
 
-    const alreadyMember = await db.oneOrNone(`
-      SELECT 1 FROM leaderboard_members
-      WHERE leaderboard_id = $1 AND username = $2
-    `, [leaderboardId, friend_username]);
+      const alreadyMember = await db.oneOrNone(`
+        SELECT 1 FROM leaderboard_members
+        WHERE leaderboard_id = $1 AND username = $2
+      `, [leaderboardId, friend]);
 
-    if (alreadyInvited || alreadyMember) {
-      return res.redirect(`/leaderboard/${leaderboardId}?error=Already invited or member`);
+      if (!alreadyInvited && !alreadyMember) {
+        await db.none(`
+          INSERT INTO leaderboard_invites (leaderboard_id, from_user, to_user)
+          VALUES ($1, $2, $3)
+        `, [leaderboardId, fromUser, friend]);
+      }
     }
 
-    await db.none(`
-      INSERT INTO leaderboard_invites (leaderboard_id, from_user, to_user)
-      VALUES ($1, $2, $3)
-    `, [leaderboardId, fromUser, friend_username]);
-
-    res.redirect(`/leaderboard/${leaderboardId}?success=Invite sent`);
-  } catch (error) {
-    console.error('Error inviting friend:', error);
-    res.redirect(`/leaderboard/${leaderboardId}?error=Failed to invite`);
-
+    res.redirect(`/leaderboard/${leaderboardId}`);
+  } catch (err) {
+    console.error('Error inviting friends:', err);
+    res.redirect(`/leaderboard/${leaderboardId}?error=Invite failed`);
   }
 });
+
 
 // *****************************************************
 //                    Store
